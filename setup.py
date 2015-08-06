@@ -1,14 +1,23 @@
 # -*- coding: utf-8 -*-
 
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
+
+try:
+    import pypandoc
+    LDESC = pypandoc.convert('README.md', 'rst')
+except (IOError, ImportError, RuntimeError):
+    LDESC = ''
 
 setup(name='ds1054z',
-      version = '0.2.0',
-      description = '',
-      long_description = '',
+      version = '0.2.1',
+      description = 'Python package and software for the Rigol DS1054Z oscilloscope.',
+      long_description = LDESC,
       author = 'Philipp Klaus',
       author_email = 'philipp.l.klaus@web.de',
-      url = '',
+      url = 'https://github.com/pklaus/ds1054z',
       license = 'GPL',
       packages = ['ds1054z'],
       scripts = ['scripts/ds1054z'],
@@ -16,15 +25,19 @@ setup(name='ds1054z',
       zip_safe = True,
       platforms = 'any',
       requires = ['python_vxi11'],
-      keywords = 'usbtmc Rigol Oscilloscope',
+      keywords = 'Rigol Oscilloscope DS1054Z',
       classifiers = [
           'Development Status :: 4 - Beta',
           'Operating System :: OS Independent',
-          'License :: OSI Approved :: GPL License',
+          'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
           'Programming Language :: Python',
           'Programming Language :: Python :: 3',
           'Topic :: System :: Monitoring',
           'Topic :: System :: Logging',
+          'Topic :: Scientific/Engineering :: Visualization',
+          'Topic :: Scientific/Engineering',
+          'Topic :: System :: Hardware :: Hardware Drivers',
+          'Intended Audience :: Science/Research',
       ]
 )
 
