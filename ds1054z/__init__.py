@@ -17,8 +17,6 @@ class DS1054Z(vxi11.Instrument):
     IDN_PATTERN = r'^RIGOL TECHNOLOGIES,DS1\d\d\dZ,'
     ENCODING = 'utf-8'
     H_GRID = 12
-    TMC_HEADER_BYTES = 11
-    TERMINATOR_BYTES = 3
     DISPLAY_DATA_BYTES = 1152068
 
     def __init__(self, *args, **kwargs):
@@ -62,6 +60,12 @@ class DS1054Z(vxi11.Instrument):
         cmd = cmd.encode(self.ENCODING)
         return self.ask_raw(cmd, *args, **kwargs)
 
+    @staticmethod
+    def _clean_tmc_header(tmc_data):
+        n_header_bytes = int(chr(tmc_data[1]))+2
+        n_data_bytes = int(tmc_data[2:n_header_bytes].decode('ascii'))
+        return tmc_data[n_header_bytes:n_header_bytes + n_data_bytes]
+
     @property
     def idn(self):
         return self.query("*IDN?")
@@ -96,7 +100,7 @@ class DS1054Z(vxi11.Instrument):
         logger.info("read {} bytes in .display_data".format(len(buff)))
         if len(buff) != self.DISPLAY_DATA_BYTES:
             raise NameError("display_data: didn't receive the right number of bytes")
-        return buff[self.TMC_HEADER_BYTES:-self.TERMINATOR_BYTES]
+        return DS1054Z._clean_tmc_header(buff)
 
     @property
     def displayed_channels(self):
