@@ -20,6 +20,18 @@ class DS1054Z(vxi11.Instrument):
         cmd = cmd.encode(self.ENCODING)
         return self.ask_raw(cmd, *args, **kwargs)
 
+    def stop(self):
+        self.write(":STOP")
+
+    def run(self):
+        self.write(":RUN")
+
+    def single(self):
+        self.write(":SINGle")
+
+    def tforce(self):
+        self.write(":TFORce")
+
     @property
     def memory_depth(self):
         mdep = self.query(":ACQuire:MDEPth?")

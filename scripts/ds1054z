@@ -29,6 +29,7 @@ def main():
     parser.add_argument('--shell', '-s', action='store_true', help='Start an interactive shell')
     parser.add_argument('--properties', '-p', default=[], type=comma_sep,
         help='Query properties of the DS1054Z instance (separated by a comma)')
+    parser.add_argument('--operate', choices=('run', 'stop', 'single', 'tforce'), help='Control essential oscilloscope operation')
     parser.add_argument('--debug', action='store_true', help='Enable debugging output')
     parser.add_argument('device', help='The device string. Typically its IP.')
     args = parser.parse_args()
@@ -37,6 +38,9 @@ def main():
         logging.basicConfig(level=logging.DEBUG)
 
     ds = DS1054Z(args.device)
+
+    if args.operate:
+        getattr(ds, args.operate)()
 
     for prop in args.properties:
         val = getattr(ds, prop)
