@@ -12,7 +12,7 @@ except (IOError, ImportError, RuntimeError):
     LDESC = ''
 
 setup(name='ds1054z',
-      version = '0.2.1',
+      version = '0.2.2',
       description = 'Python package and software for the Rigol DS1054Z oscilloscope.',
       long_description = LDESC,
       author = 'Philipp Klaus',
@@ -24,7 +24,7 @@ setup(name='ds1054z',
       include_package_data = True,
       zip_safe = True,
       platforms = 'any',
-      requires = ['python_vxi11'],
+      install_requires = ['python_vxi11'],
       keywords = 'Rigol Oscilloscope DS1054Z',
       classifiers = [
           'Development Status :: 4 - Beta',
