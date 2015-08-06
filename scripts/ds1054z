@@ -1,0 +1,50 @@
+#!/usr/bin/env python
+
+"""
+A shell for USBTMC devices
+"""
+
+import argparse
+from builtins import input
+
+from ds1054z import DS1054Z
+
+HOWTO = """
+Enter a command. It will be sent to the DS1054Z.
+If the command contains a question mark ('?'), the answer
+will be read from the device.
+Quit the shell with  'quit'  or by pressing Ctrl-C
+"""
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('device', help='The device string. Typically its IP.')
+    args = parser.parse_args()
+
+    ds = DS1054Z(args.device)
+    print(HOWTO)
+    print('> *IDN?')
+    print(ds.query("*IDN?"))
+    try:
+        while True:
+            cmd = input('> ')
+            cmd = cmd.strip()
+            if cmd in ('quit', 'exit'):
+                break
+            if '?' in cmd:
+                ret = ds.query_raw(cmd)
+                try:
+                    print(ret.decode('utf-8').strip())
+                except UnicodeDecodeError:
+                    print('binary message:', ret)
+            else:
+                ds.write(cmd)
+    except KeyboardInterrupt as e:
+        print('\nCtrl-C pressed.')
+    except EOFError:
+        pass
+    print('Exiting...')
+
+if __name__ == "__main__":
+    main()
+
