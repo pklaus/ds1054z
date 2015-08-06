@@ -15,17 +15,10 @@ class DS1054Z(vxi11.Instrument):
 
     @property
     def memory_depth(self):
-        # ACQuire:MDEPth
-        mdep = self.query("ACQ:MDEP?")
-
+        mdep = self.query(":ACQuire:MDEPth?")
         if mdep == "AUTO":
-            # ACQuire:SRATe
-            srate = self.query("ACQ:SRAT?")
-
-            # TIMebase[:MAIN]:SCALe
-            scal = self.query("TIM:SCAL?")
-
+            srate = self.query(":ACQuire:SRATe?")
+            scal = self.query(":TIMebase:MAIN:SCALe?")
             mdep = self.H_GRID * float(scal) * float(srate)
-
         return float(mdep)
 
