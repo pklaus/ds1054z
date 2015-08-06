@@ -40,3 +40,11 @@ class DS1054Z(vxi11.Instrument):
             raise NameError("display_data: didn't receive the right number of bytes")
         return buff[self.TMC_HEADER_BYTES:-self.TERMINATOR_BYTES]
 
+    @property
+    def displayed_channels(self):
+        ''' returns the list of channels currently displayed on the scope '''
+        channel_list = []
+        for channel in ["CHAN1", "CHAN2", "CHAN3", "CHAN4", "MATH"]:
+            if self.query(channel + ":DISPlay?") == '1':
+                channel_list.append(channel)
+        return channel_list
