@@ -57,6 +57,10 @@ class DS1054Z(vxi11.Instrument):
         return self.ask(*args, **kwargs)
 
     def query_raw(self, cmd, *args, **kwargs):
+        '''
+        this is the slightly modified version of query_raw() / ask_raw():
+        it takes a command string and returns bytes
+        '''
         cmd = cmd.encode(self.ENCODING)
         return self.ask_raw(cmd, *args, **kwargs)
 
