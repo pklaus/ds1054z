@@ -1,10 +1,16 @@
 
 import logging
 import re
+import time
 
 import vxi11
 
 logger = logging.getLogger(__name__)
+
+try:
+    clock = time.perf_counter
+except:
+    clock = time.time
 
 class DS1054Z(vxi11.Instrument):
 
@@ -16,6 +22,7 @@ class DS1054Z(vxi11.Instrument):
     DISPLAY_DATA_BYTES = 1152068
 
     def __init__(self, *args, **kwargs):
+        self.start = clock()
         super().__init__(*args, **kwargs)
         idn = self.idn
         assert re.match(self.IDN_PATTERN, idn)
@@ -25,13 +32,27 @@ class DS1054Z(vxi11.Instrument):
         self.serial = idn[2]
         self.firmware = idn[3]
 
+    def clock(self):
+        return clock() - self.start
+
+    def log_timing(self, msg):
+        logger.info('{0:.3f} - {1}'.format(self.clock(), msg))
+
     def write_raw(self, cmd, *args, **kwargs):
+        self.log_timing('starting write')
         logger.debug('sending: ' + repr(cmd))
         super().write_raw(cmd, *args, **kwargs)
+        self.log_timing('finishing write')
 
     def read_raw(self, *args, **kwargs):
+        self.log_timing('starting read')
         data = super().read_raw(*args, **kwargs)
-        logger.debug('received: ' + repr(data))
+        self.log_timing('finished reading {} bytes'.format(len(data)))
+        if len(data) > 200:
+            def format_hex(byte_str): return ''.join( [ "%02X " % x  for x in byte_str ] ).strip()
+            logger.debug('received a long answer: {} ... {}'.format(format_hex(data[0:10]), format_hex(data[-10:])))
+        else:
+            logger.debug('received: ' + repr(data))
         return data
 
     def query(self, *args, **kwargs):
