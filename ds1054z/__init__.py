@@ -1,5 +1,6 @@
 
 import logging
+import re
 
 import vxi11
 
@@ -7,11 +8,22 @@ logger = logging.getLogger(__name__)
 
 class DS1054Z(vxi11.Instrument):
 
+    IDN_PATTERN = r'^RIGOL TECHNOLOGIES,DS1\d\d\dZ,'
     ENCODING = 'utf-8'
     H_GRID = 12
     TMC_HEADER_BYTES = 11
     TERMINATOR_BYTES = 3
     DISPLAY_DATA_BYTES = 1152068
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        idn = self.idn
+        assert re.match(self.IDN_PATTERN, idn)
+        idn = idn.split(',')
+        self.vendor = idn[0]
+        self.product = idn[1]
+        self.serial = idn[2]
+        self.firmware = idn[3]
 
     def query(self, *args, **kwargs):
         return self.ask(*args, **kwargs)
@@ -19,6 +31,10 @@ class DS1054Z(vxi11.Instrument):
     def query_raw(self, cmd, *args, **kwargs):
         cmd = cmd.encode(self.ENCODING)
         return self.ask_raw(cmd, *args, **kwargs)
+
+    @property
+    def idn(self):
+        return self.query("*IDN?")
 
     def stop(self):
         self.write(":STOP")
