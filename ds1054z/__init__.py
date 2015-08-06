@@ -34,13 +34,9 @@ class DS1054Z(vxi11.Instrument):
         # Ask for an oscilloscope display print screen
         self.write(":DISPlay:DATA?")
         logger.info("Receiving screen capture...")
-        buff = b""
-        while len(buff) < self.DISPLAY_DATA_BYTES:
-            tmp = self.read_raw(self.DISPLAY_DATA_BYTES)
-            logger.info("read {} bytes in .display_data".format(len(tmp)))
-            if len(tmp) == 0:
-                break
-            buff += tmp
-
+        buff = self.read_raw(self.DISPLAY_DATA_BYTES)
+        logger.info("read {} bytes in .display_data".format(len(buff)))
+        if len(buff) != self.DISPLAY_DATA_BYTES:
+            raise NameError("display_data: didn't receive the right number of bytes")
         return buff[self.TMC_HEADER_BYTES:-self.TERMINATOR_BYTES]
 
