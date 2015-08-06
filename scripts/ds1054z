@@ -16,16 +16,21 @@ will be read from the device.
 Quit the shell with  'quit'  or by pressing Ctrl-C
 """
 
+def comma_sep(s):
+    return s.split(',')
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('device', help='The device string. Typically its IP.')
     parser.add_argument('--shell', action='store_true', help='Start an interactive shell')
-    parser.add_argument('--property', help='Query a property of the DS1054Z instance')
+    parser.add_argument('--properties', default=[], type=comma_sep,
+        help='Query properties of the DS1054Z instance (separated by a comma)')
     args = parser.parse_args()
 
     ds = DS1054Z(args.device)
 
-    if args.property: print(getattr(ds, args.property))
+    for prop in args.properties:
+        print(getattr(ds, prop))
 
     if args.shell: run_shell(ds)
 
