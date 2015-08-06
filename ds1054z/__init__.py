@@ -25,6 +25,15 @@ class DS1054Z(vxi11.Instrument):
         self.serial = idn[2]
         self.firmware = idn[3]
 
+    def write_raw(self, cmd, *args, **kwargs):
+        logger.debug('sending: ' + repr(cmd))
+        super().write_raw(cmd, *args, **kwargs)
+
+    def read_raw(self, *args, **kwargs):
+        data = super().read_raw(*args, **kwargs)
+        logger.debug('received: ' + repr(data))
+        return data
+
     def query(self, *args, **kwargs):
         return self.ask(*args, **kwargs)
 
