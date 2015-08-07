@@ -25,6 +25,9 @@ setup(name='ds1054z',
       zip_safe = True,
       platforms = 'any',
       install_requires = ['python_vxi11'],
+      package_data = {
+          '': ['resources/*.png'],
+      },
       keywords = 'Rigol Oscilloscope DS1054Z',
       classifiers = [
           'Development Status :: 4 - Beta',
