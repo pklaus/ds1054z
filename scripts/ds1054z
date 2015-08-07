@@ -5,13 +5,16 @@ CLI for the DS1054Z scope by Rigol
 """
 
 import argparse
-from builtins import input
 import logging
 import time
 import io
 from pkg_resources import resource_filename
 
 from ds1054z import DS1054Z
+
+# Py2 fix for input()
+try: input = raw_input
+except NameError: pass
 
 SHELL_HOWTO = """
 Enter a command. It will be sent to the DS1054Z.
