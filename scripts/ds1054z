@@ -27,7 +27,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--verbose', '-v', action='store_true', help='More verbose output')
     parser.add_argument('--save-screen', '-i', metavar='IMG_FILENAME', help='Save an image of the screen')
-    parser.add_argument('--overlay', '-o', action='store_true', help='Overlay screen capture with a mask to highlight the waveform')
+    parser.add_argument('--overlay', '-o', metavar='RATIO', type=float, default=0.5, help='Dim on-screen controls in --save-screen with a mask (default ratio: 0.5)')
     parser.add_argument('--shell', '-s', action='store_true', help='Start an interactive shell')
     parser.add_argument('--properties', '-p', default=[], type=comma_sep,
         help='Query properties of the DS1054Z instance (separated by a comma)')
@@ -63,11 +63,12 @@ def main():
         filename = fmt.format(ts=ts)
         # getting and saving the image
         im = Image.open(io.BytesIO(ds.display_data))
-        if args.overlay:
-            overlay_filename = resource_filename("ds1054z","resources/overlay050.png")
-            overlay = Image.open(overlay_filename)
-            im.putalpha(255)
-            im = Image.alpha_composite(im, overlay)
+        overlay_filename = resource_filename("ds1054z","resources/overlay.png")
+        overlay = Image.open(overlay_filename)
+        alpha_100_percent =  Image.new(overlay.mode, overlay.size, color=(0,0,0,0))
+        overlay = Image.blend(alpha_100_percent, overlay, args.overlay)
+        im.putalpha(255)
+        im = Image.alpha_composite(im, overlay)
         im.save(filename)
         if args.verbose: print("Saved file: " + filename)
 
