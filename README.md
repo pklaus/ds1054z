@@ -13,7 +13,13 @@ Installing it is dead simple:
 
     pip install ds1054z
 
-ds1054z depends on [python-vxi11](https://github.com/python-ivi/python-vxi11) which should automatically get installed along with itself.
+ds1054z depends on [python-vxi11](https://github.com/python-ivi/python-vxi11)
+which should automatically get installed along with itself.
+
+To `--save-screen` shots with the CLI tool, it also needs Pillow, which will
+be installed alongside if you specify the extra *savescreen* when installing:
+
+    pip install ds1054z[savescreen]
 
 Usage
 -----
@@ -21,9 +27,10 @@ Usage
 The command line tool this package comes with is called `ds1054z`:
 
     philipp@lion$ ds1054z --help
-    usage: ds1054z [-h] [--verbose] [--save-screen IMG_FILENAME] [--shell]
-                   [--properties PROPERTIES] [--operate {run,stop,single,tforce}]
-                   [--debug]
+    
+    usage: ds1054z [-h] [--verbose] [--save-screen IMG_FILENAME] [--overlay RATIO]
+                   [--shell] [--properties PROPERTIES]
+                   [--operate {run,stop,single,tforce}] [--debug]
                    device
     
     CLI for the DS1054Z scope by Rigol
@@ -36,6 +43,9 @@ The command line tool this package comes with is called `ds1054z`:
       --verbose, -v         More verbose output
       --save-screen IMG_FILENAME, -i IMG_FILENAME
                             Save an image of the screen
+      --overlay RATIO, -o RATIO
+                            Dim on-screen controls in --save-screen with a mask
+                            (default ratio: 0.5)
       --shell, -s           Start an interactive shell
       --properties PROPERTIES, -p PROPERTIES
                             Query properties of the DS1054Z instance (separated by
