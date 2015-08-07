@@ -64,6 +64,17 @@ class DS1054Z(vxi11.Instrument):
         cmd = cmd.encode(self.ENCODING)
         return self.ask_raw(cmd, *args, **kwargs)
 
+    def get_waveform(self, channel, mode='NORMal'):
+        ''' mode can also be MAX or RAW '''
+        if type(channel) == int: channel = 'CHAN' + str(channel)
+        self.write(":WAVeform:SOURce " + channel)
+        self.write(":WAVeform:FORMat BYTE")
+        self.write(":WAVeform:MODE " + mode)
+        self.query(":WAVeform:STARt?")
+        self.query(":WAVeform:STOP?")
+        buff = self.query_raw(":WAVeform:DATA?")
+        return DS1054Z._clean_tmc_header(buff)
+
     @staticmethod
     def _clean_tmc_header(tmc_data):
         n_header_bytes = int(chr(tmc_data[1]))+2
