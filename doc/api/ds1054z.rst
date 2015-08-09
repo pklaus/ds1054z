@@ -1,5 +1,5 @@
-API of the DS1054Z Class
-========================
+
+.. automodule:: ds1054z
 
 .. autoclass:: ds1054z.DS1054Z
     :members:

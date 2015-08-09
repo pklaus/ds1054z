@@ -1,3 +1,7 @@
+"""
+The class :py:mod:`ds1054z.DS1054Z` - Easy communication with your scope
+========================================================================
+"""
 
 import logging
 import re

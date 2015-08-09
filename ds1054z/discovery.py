@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 """
-Zeroconf Discovery for Rigol DS1000Z-series scopes
---------------------------------------------------
+The submodule :py:mod:`ds1054z.discovery` - Zeroconf Discovery for Rigol DS1000Z-series scopes
+==============================================================================================
 
-This module depends on the zeroconf Python package. Thus,
+This submodule depends on the Python package :py:mod:`zeroconf`. Thus,
 
->> import ds1054z.discovery
+>>> import ds1054z.discovery
 
 raises an ImportError in case, the zeroconf package is not installed.
 
