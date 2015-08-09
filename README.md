@@ -16,10 +16,12 @@ Installing it is dead simple:
 ds1054z depends on [python-vxi11](https://github.com/python-ivi/python-vxi11)
 which should automatically get installed along with itself.
 
-To `--save-screen` shots with the CLI tool, it also needs Pillow, which will
-be installed alongside if you specify the extra *savescreen* when installing:
+To `--save-screen` shots with the CLI tool, it also needs Pillow,
+and to be able to automatically discover the IP address of the scope
+on your local network, which needs zeroconf, those requirements will
+be installed alongside if you specify those extras when installing:
 
-    pip install ds1054z[savescreen]
+    pip install ds1054z[savescreen,discovery]
 
 Usage
 -----
@@ -28,19 +30,22 @@ The command line tool this package comes with is called `ds1054z`:
 
     philipp@lion$ ds1054z --help
     
-    usage: ds1054z [-h] [--verbose] [--save-screen IMG_FILENAME] [--overlay RATIO]
-                   [--shell] [--properties PROPERTIES]
+    usage: ds1054z [-h] [--verbose] [--discover] [--save-screen IMG_FILENAME]
+                   [--overlay RATIO] [--shell] [--properties PROPERTIES]
                    [--operate {run,stop,single,tforce}] [--debug]
-                   device
+                   [device]
     
     CLI for the DS1054Z scope by Rigol
     
     positional arguments:
-      device                The device string. Typically its IP.
+      device                The device string. Typically the IP address of the
+                            oscilloscope. Will try to discover a single (!) scope
+                            on the network if you leave it out.
     
     optional arguments:
       -h, --help            show this help message and exit
       --verbose, -v         More verbose output
+      --discover, -d        Discover and list scopes in your network and exit
       --save-screen IMG_FILENAME, -i IMG_FILENAME
                             Save an image of the screen
       --overlay RATIO, -o RATIO

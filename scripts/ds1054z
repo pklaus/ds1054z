@@ -9,6 +9,7 @@ import logging
 import time
 import io
 from pkg_resources import resource_filename
+import sys
 
 from ds1054z import DS1054Z
 
@@ -29,6 +30,7 @@ def comma_sep(s):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--verbose', '-v', action='store_true', help='More verbose output')
+    parser.add_argument('--discover', '-d', action='store_true', help='Discover and list scopes in your network and exit')
     parser.add_argument('--save-screen', '-i', metavar='IMG_FILENAME', help='Save an image of the screen')
     parser.add_argument('--overlay', '-o', metavar='RATIO', type=float, default=0.5, help='Dim on-screen controls in --save-screen with a mask (default ratio: 0.5)')
     parser.add_argument('--shell', '-s', action='store_true', help='Start an interactive shell')
@@ -36,12 +38,42 @@ def main():
         help='Query properties of the DS1054Z instance (separated by a comma)')
     parser.add_argument('--operate', choices=('run', 'stop', 'single', 'tforce'), help='Control essential oscilloscope operation')
     parser.add_argument('--debug', action='store_true', help='Enable debugging output')
-    parser.add_argument('device', help='The device string. Typically its IP.')
+    parser.add_argument('device', nargs='?', help='The device string. Typically the IP address of the oscilloscope. Will try to discover a single (!) scope on the network if you leave it out.')
     args = parser.parse_args()
 
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
 
+    if args.discover:
+        try:
+            from ds1054z.discovery import discover_devices
+        except:
+            print('Discovery depends on the zeroconf Python package which is missing.')
+            sys.exit(1)
+        devices = discover_devices()
+        for device in devices:
+            print("Found a {model} with the IP Address {ip}.".format(**device))
+        sys.exit(0)
+
+    if not args.device:
+        try:
+            from ds1054z.discovery import discover_devices
+        except:
+            print("Please specify a device to connect to. Auto-discovery doesn't"
+                  "work because the zeroconf Python package is missing.")
+            sys.exit(1)
+        devices = discover_devices()
+        if len(devices) < 1:
+            print("Couln't discover any device on the network. Exiting.")
+            sys.exit(1)
+        elif len(devices) > 1:
+            print("Discovered multiple devices on the network:")
+            print("\n".join("{model} {ip}".format(**dev) for dev in devices))
+            print("Please specify the device you would like to connect to.")
+            sys.exit(1)
+        else: # len(devices) == 0
+            if args.verbose: print("Found a scope: {model} {ip}".format(**devices[0]))
+            args.device = devices[0]['ip']
     ds = DS1054Z(args.device)
 
     if args.operate:

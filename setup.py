@@ -27,6 +27,7 @@ setup(name='ds1054z',
       install_requires = ['python_vxi11'],
       extras_require = {
           'savescreen':  ["Pillow",],
+          'discovery':   ["zeroconf",],
       },
       package_data = {
           '': ['resources/*.png'],
