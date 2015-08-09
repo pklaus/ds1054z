@@ -1,5 +1,5 @@
-Usage of the DS1054Z Class
-==========================
+Using the DS1054Z Class
+=======================
 
 The Class :py:class:`ds1054z.DS1054Z` is a very easy and convenient way to
 interact with your oscilloscope programmatically.

@@ -25,6 +25,7 @@ Contents:
    :numbered:
 
    installation
+   using-the-cli
    using-the-class
    api/index
 
