@@ -68,7 +68,7 @@ def main():
         try:
             from ds1054z.discovery import discover_devices
         except:
-            print("Please specify a device to connect to. Auto-discovery doesn't"
+            print("Please specify a device to connect to. Auto-discovery doesn't "
                   "work because the zeroconf Python package is missing.")
             sys.exit(1)
         devices = discover_devices()

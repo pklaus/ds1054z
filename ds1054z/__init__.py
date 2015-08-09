@@ -14,15 +14,18 @@ except:
     clock = time.time
 
 class DS1054Z(vxi11.Instrument):
+    """
+    This class represents the oscilloscope.
+    """
 
     IDN_PATTERN = r'^RIGOL TECHNOLOGIES,DS1\d\d\dZ,'
     ENCODING = 'utf-8'
     H_GRID = 12
     DISPLAY_DATA_BYTES = 1152068
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, host, *args, **kwargs):
         self.start = clock()
-        super(DS1054Z, self).__init__(*args, **kwargs)
+        super(DS1054Z, self).__init__(host, *args, **kwargs)
         idn = self.idn
         assert re.match(self.IDN_PATTERN, idn)
         idn = idn.split(',')
@@ -53,19 +56,33 @@ class DS1054Z(vxi11.Instrument):
             logger.debug('received: ' + repr(data))
         return data
 
-    def query(self, *args, **kwargs):
-        return self.ask(*args, **kwargs)
+    def query(self, message, *args, **kwargs):
+        """
+        Write a message to the scope and read back the answer.
+        See vxi11.Instrument.ask() for optional parameters.
+        """
+        return self.ask(message, *args, **kwargs)
 
-    def query_raw(self, cmd, *args, **kwargs):
-        '''
-        this is the slightly modified version of query_raw() / ask_raw():
-        it takes a command string and returns bytes
-        '''
-        cmd = cmd.encode(self.ENCODING)
-        return self.ask_raw(cmd, *args, **kwargs)
+    def query_raw(self, message, *args, **kwargs):
+        """
+        Write a message to the scope and read a (binary) answer.
+
+        This is the slightly modified version of vxi11.Instrument.ask_raw().
+        It takes a command message string and returns the answer as bytes.
+        """
+        data = message.encode(self.ENCODING)
+        return self.ask_raw(data, *args, **kwargs)
 
     def get_waveform(self, channel, mode='NORMal'):
-        ''' mode can also be MAX or RAW '''
+        """
+        Get the waveform data for a specific channel
+
+        :param channel: The channel name (like CHAN1, ...). Alternatively specify the channel by its number (as integer).
+        :type channel: int or str
+        :param str mode: can be NORMal, MAX, or RAW
+        :return: The waveform data
+        :rtype: bytes
+        """
         if type(channel) == int: channel = 'CHAN' + str(channel)
         self.write(":WAVeform:SOURce " + channel)
         self.write(":WAVeform:FORMat BYTE")
@@ -86,22 +103,34 @@ class DS1054Z(vxi11.Instrument):
 
     @property
     def idn(self):
+        """
+        The ``*IDN?`` string of the device.
+        Will be fetched every time you access this property.
+        """
         return self.query("*IDN?")
 
     def stop(self):
+        """ Stop acquisition """
         self.write(":STOP")
 
     def run(self):
+        """ Start acquisition """
         self.write(":RUN")
 
     def single(self):
+        """ Set the oscilloscope to the single trigger mode. """
         self.write(":SINGle")
 
     def tforce(self):
+        """ Generate a trigger signal forcefully. """
         self.write(":TFORce")
 
     @property
     def memory_depth(self):
+        """
+        The current memory depth of the oscilloscope as float.
+        This property will be updated every time you access it.
+        """
         mdep = self.query(":ACQuire:MDEPth?")
         if mdep == "AUTO":
             srate = self.query(":ACQuire:SRATe?")
@@ -111,7 +140,10 @@ class DS1054Z(vxi11.Instrument):
 
     @property
     def display_data(self):
-        # Ask for an oscilloscope display print screen
+        """
+        The bitmap bytes of the current screen content.
+        This property will be updated every time you access it.
+        """
         self.write(":DISPlay:DATA?")
         logger.info("Receiving screen capture...")
         buff = self.read_raw(self.DISPLAY_DATA_BYTES)
@@ -122,7 +154,10 @@ class DS1054Z(vxi11.Instrument):
 
     @property
     def displayed_channels(self):
-        ''' returns the list of channels currently displayed on the scope '''
+        """
+        The list of channels currently displayed on the scope.
+        This property will be updated every time you access it.
+        """
         channel_list = []
         for channel in ["CHAN1", "CHAN2", "CHAN3", "CHAN4", "MATH"]:
             if self.query(channel + ":DISPlay?") == '1':
