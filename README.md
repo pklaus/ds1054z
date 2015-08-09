@@ -73,4 +73,4 @@ Resources
 
 [installation section]: https://ds1054z.readthedocs.org/en/stable/installation.html
 [package documentation]: https://ds1054z.readthedocs.org/en/stable/index.html
-[the DS1054Z class]: https://ds1054z.readthedocs.org/en/latest/api/ds1054z.html
+[the DS1054Z class]: https://ds1054z.readthedocs.org/en/stable/api/ds1054z.html
