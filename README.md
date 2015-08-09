@@ -1,83 +1,76 @@
 
-ds1054z
-=======
+# ds1054z
 
 This package allows you to connect to your Rigol DS1054Z
-oscilloscope via Ethernet. It comes with a class to use
-in your own scripts as well as with a command line tool.
+oscilloscope via Ethernet. It comes with a command line tool
+as well as with a class to control the scope with your own script.
 
-Installation
-------------
+## Installation
 
-Installing it is dead simple:
+The installation is dead simple:
 
-    pip install ds1054z
+    pip install ds1054z[savescreen,discovery]
 
 ds1054z depends on [python-vxi11](https://github.com/python-ivi/python-vxi11)
 which should automatically get installed along with itself.
 
-To `--save-screen` shots with the CLI tool, it also needs Pillow,
-and to be able to automatically discover the IP address of the scope
-on your local network, which needs zeroconf, those requirements will
-be installed alongside if you specify those extras when installing:
 
-    pip install ds1054z[savescreen,discovery]
+For more information on the installation, please consult the [installation section][] of the [package documentation][].
 
-Usage
------
+## Features
 
-The command line tool this package comes with is called `ds1054z`:
+* Discovering your scope via mDNS / DNS-SD
+* Saving Screenshots (incl. adjustable dimming of on-screen controls)
+* Running / stopping the scope
+* Acquiring waveforms
+* ... more to come!
 
-    philipp@lion$ ds1054z --help
-    
-    usage: ds1054z [-h] [--discover] [--save-screen IMG_FILENAME]
-                   [--overlay RATIO] [--properties PROPERTIES]
-                   [--operate {run,stop,single,tforce}] [--shell] [--verbose]
-                   [--debug]
-                   [device]
-    
-    CLI for the DS1054Z scope by Rigol
-    
-    positional arguments:
-      device                The device string. Typically the IP address of the
-                            oscilloscope. Will try to discover a single (!) scope
-                            on the network if you leave it out.
-    
-    optional arguments:
-      -h, --help            show this help message and exit
-      --discover, -d        Discover and list scopes in your network and exit
-      --save-screen IMG_FILENAME, -i IMG_FILENAME
-                            Save an image of the screen
-      --overlay RATIO, -o RATIO
-                            Dim on-screen controls in --save-screen with a mask
-                            (default ratio: 0.5)
-      --properties PROPERTIES, -p PROPERTIES
-                            Query properties of the DS1054Z instance (separated by
-                            a comma)
-      --operate {run,stop,single,tforce}
-                            Operate essential oscilloscope functions
-      --shell, -s           Start an interactive shell to control your scope.
-      --verbose, -v         More verbose output
-      --debug               Enable debugging output
+## Usage
 
-Or use the DS1054Z class in your own code:
 
-    from ds1054z import DS1054Z
-    
-    scope = DS1054Z('192.168.0.23')
-    print("Connected to: ", scope.idn)
-    
-    print("displayed channels: ", str(scope.displayed_channels))
+### Command Line Tool
 
+This package installs a versatile command line (CLI) tool called `ds1054z`. You can use it to save the screen of your scope, for example:
+
+```bash
+ds1054z \
+  --save-screen 'default' --overlay 0.3 \
+  192.168.0.23
+```
+
+As a result, a file like this will be saved to your current working directory:
+
+![oscilloscope screenshot](doc/images/ds1054z-scope-display.png)
+
+Find out more ways to use the CLI tool with `ds1054z --help`
+
+### Developers
+
+If you're into Python programming, use [the DS1054Z class][]
+in your own code:
+
+```python
+from ds1054z import DS1054Z
+
+scope = DS1054Z('192.168.0.23')
+print("Connected to: ", scope.idn)
+
+print("Currently displayed channels: ", str(scope.displayed_channels))
+```
 
 Author
 ------
 
-* Philipp Klaus
+* Philipp Klaus  
+  <philipp.l.klaus@web.de>
 
 Resources
 ---------
 
 * This Python package was inspired by [DS1054Z_screen_capture](https://github.com/RoGeorge/DS1054Z_screen_capture).
+* The device discovery built into this software is largely based on [this code](https://gist.github.com/MerseyViking/c67b7d6ebdda55929fbd) by [MerseyViking / GeoSpark](https://github.com/MerseyViking).
 * There is a Qt4 based GUI interface for the scope called [DSRemote](http://www.teuniz.net/DSRemote/).
 
+[installation section]: https://ds1054z.readthedocs.org/en/stable/installation.html
+[package documentation]: https://ds1054z.readthedocs.org/en/stable/index.html
+[the DS1054Z class]: https://ds1054z.readthedocs.org/en/latest/api/ds1054z.html
