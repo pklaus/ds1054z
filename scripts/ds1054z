@@ -81,7 +81,7 @@ def main():
             print("Please specify the device you would like to connect to.")
             sys.exit(1)
         else: # len(devices) == 0
-            if args.verbose: print("Found a scope: {model} {ip}".format(**devices[0]))
+            if args.verbose: print("Found a scope: {model} @ {ip}".format(**devices[0]))
             args.device = devices[0]['ip']
     ds = DS1054Z(args.device)
 
@@ -114,7 +114,8 @@ def main():
         im.putalpha(255)
         im = Image.alpha_composite(im, overlay)
         im.save(filename)
-        if args.verbose: print("Saved file: " + filename)
+        if not args.verbose: print(filename)
+        else: print("Saved file: " + filename)
 
     if args.shell: run_shell(ds)
 

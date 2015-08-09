@@ -102,7 +102,7 @@ def discover_devices(if_any_return_after=0.8, timeout=2.5):
     devices = []
     for result in _get_ds1000z_results(if_any_return_after=0.8, timeout=2.5):
         device = {
-          'model': result['zc_info'].properties[b'Model'],
+          'model': result['zc_info'].properties[b'Model'].decode('utf-8'),
           'ip': socket.inet_ntoa(result['zc_info'].address),
         }
         devices.append(device)
