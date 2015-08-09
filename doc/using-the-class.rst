@@ -23,7 +23,8 @@ More information on the resources string can be found in the `README`_ of the
 You can then check the identification of the device by accessing its :py:attr:`idn` property::
 
 >>> print(scope.idn)
-which will print something like `RIGOL TECHNOLOGIES,DS1054Z,DS1ZA116171318,00.04.03`.
+
+which will print something like ``RIGOL TECHNOLOGIES,DS1054Z,DS1ZA116171318,00.04.03``.
 
 To send a command to the oscilloscope, use the :py:meth`ds1054z.DS1054Z.write` method.
 Here we start the scope:
