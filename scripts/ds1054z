@@ -35,12 +35,12 @@ def main():
         help='Save an image of the screen')
     parser.add_argument('--overlay', '-o', metavar='RATIO', type=float, default=0.5,
         help='Dim on-screen controls in --save-screen with a mask (default ratio: 0.5)')
-    parser.add_argument('--shell', '-s', action='store_true',
-        help='Start an interactive shell')
     parser.add_argument('--properties', '-p', default=[], type=comma_sep,
         help='Query properties of the DS1054Z instance (separated by a comma)')
     parser.add_argument('--operate', choices=('run', 'stop', 'single', 'tforce'),
-        help='Control essential oscilloscope operation')
+        help='Operate essential oscilloscope functions')
+    parser.add_argument('--shell', '-s', action='store_true',
+        help='Start an interactive shell to control your scope.')
     parser.add_argument('--verbose', '-v', action='store_true',
         help='More verbose output')
     parser.add_argument('--debug', action='store_true',

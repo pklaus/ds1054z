@@ -30,9 +30,10 @@ The command line tool this package comes with is called `ds1054z`:
 
     philipp@lion$ ds1054z --help
     
-    usage: ds1054z [-h] [--verbose] [--discover] [--save-screen IMG_FILENAME]
-                   [--overlay RATIO] [--shell] [--properties PROPERTIES]
-                   [--operate {run,stop,single,tforce}] [--debug]
+    usage: ds1054z [-h] [--discover] [--save-screen IMG_FILENAME]
+                   [--overlay RATIO] [--properties PROPERTIES]
+                   [--operate {run,stop,single,tforce}] [--shell] [--verbose]
+                   [--debug]
                    [device]
     
     CLI for the DS1054Z scope by Rigol
@@ -44,19 +45,19 @@ The command line tool this package comes with is called `ds1054z`:
     
     optional arguments:
       -h, --help            show this help message and exit
-      --verbose, -v         More verbose output
       --discover, -d        Discover and list scopes in your network and exit
       --save-screen IMG_FILENAME, -i IMG_FILENAME
                             Save an image of the screen
       --overlay RATIO, -o RATIO
                             Dim on-screen controls in --save-screen with a mask
                             (default ratio: 0.5)
-      --shell, -s           Start an interactive shell
       --properties PROPERTIES, -p PROPERTIES
                             Query properties of the DS1054Z instance (separated by
                             a comma)
       --operate {run,stop,single,tforce}
-                            Control essential oscilloscope operation
+                            Operate essential oscilloscope functions
+      --shell, -s           Start an interactive shell to control your scope.
+      --verbose, -v         More verbose output
       --debug               Enable debugging output
 
 Or use the DS1054Z class in your own code:
