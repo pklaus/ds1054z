@@ -34,7 +34,7 @@ This package installs a versatile command line (CLI) tool called `ds1054z`. You 
 
 ```bash
 ds1054z \
-  --save-screen 'default' --overlay 0.3 \
+  --save-screen 'default' --overlay 0.6 \
   192.168.0.23
 ```
 
