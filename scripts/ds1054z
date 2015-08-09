@@ -29,16 +29,25 @@ def comma_sep(s):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--verbose', '-v', action='store_true', help='More verbose output')
-    parser.add_argument('--discover', '-d', action='store_true', help='Discover and list scopes in your network and exit')
-    parser.add_argument('--save-screen', '-i', metavar='IMG_FILENAME', help='Save an image of the screen')
-    parser.add_argument('--overlay', '-o', metavar='RATIO', type=float, default=0.5, help='Dim on-screen controls in --save-screen with a mask (default ratio: 0.5)')
-    parser.add_argument('--shell', '-s', action='store_true', help='Start an interactive shell')
+    parser.add_argument('--discover', '-d', action='store_true',
+        help='Discover and list scopes in your network and exit')
+    parser.add_argument('--save-screen', '-i', metavar='IMG_FILENAME',
+        help='Save an image of the screen')
+    parser.add_argument('--overlay', '-o', metavar='RATIO', type=float, default=0.5,
+        help='Dim on-screen controls in --save-screen with a mask (default ratio: 0.5)')
+    parser.add_argument('--shell', '-s', action='store_true',
+        help='Start an interactive shell')
     parser.add_argument('--properties', '-p', default=[], type=comma_sep,
         help='Query properties of the DS1054Z instance (separated by a comma)')
-    parser.add_argument('--operate', choices=('run', 'stop', 'single', 'tforce'), help='Control essential oscilloscope operation')
-    parser.add_argument('--debug', action='store_true', help='Enable debugging output')
-    parser.add_argument('device', nargs='?', help='The device string. Typically the IP address of the oscilloscope. Will try to discover a single (!) scope on the network if you leave it out.')
+    parser.add_argument('--operate', choices=('run', 'stop', 'single', 'tforce'),
+        help='Control essential oscilloscope operation')
+    parser.add_argument('--verbose', '-v', action='store_true',
+        help='More verbose output')
+    parser.add_argument('--debug', action='store_true',
+        help='Enable debugging output')
+    parser.add_argument('device', nargs='?',
+        help='The device string. Typically the IP address of the oscilloscope. '
+             'Will try to discover a single (!) scope on the network if you leave it out.')
     args = parser.parse_args()
 
     if args.debug:
