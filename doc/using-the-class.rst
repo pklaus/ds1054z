@@ -26,7 +26,7 @@ You can then check the identification of the device by accessing its :py:attr:`i
 
 which will print something like ``RIGOL TECHNOLOGIES,DS1054Z,DS1ZA116171318,00.04.03``.
 
-To send a command to the oscilloscope, use the :py:meth`ds1054z.DS1054Z.write` method.
+To send a command to the oscilloscope, use the :any:`ds1054z.DS1054Z.write()` method.
 Here we start the scope:
 
 >>> scope.write(":RUN")
