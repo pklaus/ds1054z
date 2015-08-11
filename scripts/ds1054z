@@ -110,8 +110,8 @@ def main():
         logging.basicConfig(level=logging.DEBUG)
 
     if not args.action:
-        parser.print_help()
-        print('Please choose an action to perform.')
+        parser.print_help(sys.stderr)
+        sys.stderr.write('\nERROR: Please choose an action.\n\n')
         sys.exit(2)
 
     if args.action == 'discover':
