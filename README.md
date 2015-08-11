@@ -8,6 +8,20 @@ Off course, you can also to control the scope with your own script by using
 [the APIs](https://ds1054z.readthedocs.org/en/latest/api/index.html)
 this package has to offer.
 
+While this software is named after the entry level oscilloscope DS1054Z,
+there is no reason to believe it wouldn't also work with just any scope
+of the MSO1000Z and DS1000Z series by Rigol:
+
+* MSO1104Z-S
+* MSO1074Z-S
+* MSO1104Z
+* MSO1074Z
+* DS1104Z-S Plus
+* DS1074Z-S Plus
+* DS1104Z Plus
+* DS1074Z Plus
+* DS1054Z
+
 ## Installation
 
 The installation is dead simple:
