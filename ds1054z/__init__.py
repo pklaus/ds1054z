@@ -7,6 +7,7 @@ import logging
 import re
 import time
 import sys
+import struct
 
 import vxi11
 
@@ -77,9 +78,71 @@ class DS1054Z(vxi11.Instrument):
         data = message.encode(self.ENCODING)
         return self.ask_raw(data, *args, **kwargs)
 
-    def get_waveform(self, channel, mode='NORMal'):
+    def _interpret_channel(self, channel):
+        """ wrapper to allow specifying channels by their name (str) or by their number (int) """
+        if type(channel) == int:
+            channel = 'CHAN' + str(channel)
+        return channel
+
+    @property
+    def running(self):
+        return self.ask(':TRIGger:STATus?') in ('TD', 'WAIT', 'RUN', 'AUTO')
+
+    @property
+    def waveform_preamble(self):
+        values = self.query(":WAVeform:PREamble?")
+        # format: <format>,<type>,<points>,<count>,<xincrement>,<xorigin>,<xreference>,<yincrement>,<yorigin>,<yreference>
+        # for example: 0,0,1200,1,2.000000e-05,-1.456000e-02,0,4.000000e-02,-75,127
+        #
+        #             0   format      0 (BYTE), 1 (WORD) or 2 (ASC)
+        #             0   type        0 (NORMal), 1 (MAXimum) or 2 (RAW)
+        #          1200   points      an integer between 1 and 12000000
+        #             1   count       number of averages
+        #  2.000000e-05   xincrement  time delta between subsequent data points
+        # -1.456000e-02   xorigin     start time
+        #             0   xreference  reference time (always zero?)
+        #  4.000000e-02   yincrement
+        #           -75   yorigin
+        #           127   yreference
+        values = values.split(',')
+        assert len(values) == 10
+        ## convert all to float:
+        #values  = (float(v) for v in values)
+        #fmt, typ, pnts, cnt, xinc, xorig, xref, yinc, yorig, yref = values
+        ## or some to int, some to float:
+        fmt, typ, pnts, cnt, xref, yorig, yref  = (int(val) for val in values[:4] + values[6:7] + values[8:10])
+        xinc, xorig, yinc = (float(val) for val in values[4:6] + values[7:8])
+        return (fmt, typ, pnts, cnt, xinc, xorig, xref, yinc, yorig, yref)
+
+    def get_waveform_values(self, channel, mode='NORMal'):
         """
-        Get the waveform data for a specific channel
+        Get waveform values for a specific channel.
+        Returns a list of floats representing the waveform in volts.
+
+        If you set mode to RAW, the scope will be stopped first.
+        Please start it again yourself, if you need to, afterwards.
+
+        :param channel: The channel name (like CHAN1, ...). Alternatively specify the channel by its number (as integer).
+        :type channel: int or str
+        :param str mode: can be NORMal, MAX, or RAW
+        :return: The waveform data
+        :rtype: list of float
+        """
+
+        buff = self.get_waveform_bytes(channel, mode)
+        fmt, typ, pnts, cnt, xinc, xorig, xref, yinc, yorig, yref = self.waveform_preamble
+        data = struct.unpack(str(len(buff))+'B', buff)
+        data = list(data)
+        data = [(val - yorig - yref)*yinc for val in data]
+        return data
+
+    def get_waveform_bytes(self, channel, mode='NORMal'):
+        """
+        Get the bytes of waveform data for a specific channel
+        Automatically splits the request into chunks if total bytes would be too much.
+
+        If you set mode to RAW, the scope will be stopped first.
+        Please start it again yourself, if you need to, afterwards.
 
         :param channel: The channel name (like CHAN1, ...). Alternatively specify the channel by its number (as integer).
         :type channel: int or str
@@ -87,14 +150,26 @@ class DS1054Z(vxi11.Instrument):
         :return: The waveform data
         :rtype: bytes
         """
-        if type(channel) == int: channel = 'CHAN' + str(channel)
+        channel = self._interpret_channel(channel)
+        if mode == 'RAW':
+            if self.running:
+                self.stop()
         self.write(":WAVeform:SOURce " + channel)
         self.write(":WAVeform:FORMat BYTE")
         self.write(":WAVeform:MODE " + mode)
-        self.query(":WAVeform:STARt?")
-        self.query(":WAVeform:STOP?")
-        buff = self.query_raw(":WAVeform:DATA?")
-        return DS1054Z._clean_tmc_header(buff)
+        total = self.memory_depth
+        buff = b""
+        max_byte_len = 250000
+        pos = 1
+        while len(buff) < total:
+            remaining =  total - len(buff)
+            self.write(":WAVeform:STARt {}".format(pos))
+            end_pos = min(total, pos+max_byte_len-1)
+            self.write(":WAVeform:STOP {}".format(end_pos))
+            tmp_buff = self.query_raw(":WAVeform:DATA?")
+            buff += DS1054Z._clean_tmc_header(tmp_buff)
+            pos += max_byte_len
+        return buff
 
     @staticmethod
     def _clean_tmc_header(tmc_data):
@@ -140,7 +215,7 @@ class DS1054Z(vxi11.Instrument):
             srate = self.query(":ACQuire:SRATe?")
             scal = self.query(":TIMebase:MAIN:SCALe?")
             mdep = self.H_GRID * float(scal) * float(srate)
-        return float(mdep)
+        return int(float(mdep))
 
     @property
     def display_data(self):
