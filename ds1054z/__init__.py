@@ -123,19 +123,24 @@ class DS1054Z(vxi11.Instrument):
         xinc, xorig, yinc = (float(val) for val in values[4:6] + values[7:8])
         return (fmt, typ, pnts, cnt, xinc, xorig, xref, yinc, yorig, yref)
 
-    def get_waveform_values(self, channel, mode='NORMal'):
+    def get_waveform_samples(self, channel, mode='NORMal'):
         """
-        Get waveform values for a specific channel.
-        Returns the voltage samples of the waveform.
+        Returns the waveform voltage samples of the specified channel.
+
+        The mode argument translates into a call to ``:WAVeform:MODE``
+        setting up how many samples you want to read back. If you set it
+        to normal mode, only the screen content samples will be returned.
+        In raw mode, the whole scope memory will be read out, which can
+        take many seconds depending on the current memory depth.
 
         If you set mode to RAW, the scope will be stopped first.
         Please start it again yourself, if you need to, afterwards.
 
-        :param channel: The channel name (like CHAN1, ...). Alternatively specify the channel by its number (as integer).
+        :param channel: The channel name (like 'CHAN1' or 1).
         :type channel: int or str
-        :param str mode: can be NORMal, MAX, or RAW
-        :return: voltage_samples
-        :rtype: list of float
+        :param str mode: can be 'NORMal', 'MAX', or 'RAW'
+        :return: voltage samples
+        :rtype: list of float values
         """
 
         buff = self.get_waveform_bytes(channel, mode)
@@ -147,9 +152,9 @@ class DS1054Z(vxi11.Instrument):
 
     def get_waveform_bytes(self, channel, mode='NORMal'):
         """
-        Get the bytes of waveform data for a specific channel.
-
-        In most cases you would want to use the higher level function :py:meth:`get_waveform_values()` instead.
+        Get the waveform data for a specific channel as :py:obj:`bytes`.
+        (In most cases you would want to use the higher level
+        function :py:meth:`get_waveform_values()` instead.)
 
         This function automatically splits the data request into chunks
         if it cannot read all data in a single request.
