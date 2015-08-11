@@ -90,6 +90,19 @@ class DS1054Z(vxi11.Instrument):
 
     @property
     def waveform_preamble(self):
+        """
+        Returns a tuple of length 10 with the values returned by the command
+        ``:WAVeform:PREamble?`` parsed as floats and ints.
+
+        They are essential values if you want to convert BYTE data from the scope
+        to voltage readings or if you want to recreate the scope's
+        display content programmatically.
+
+        This property will be fetched from the scope every time you access it.
+
+        :return: (fmt, typ, pnts, cnt, xinc, xorig, xref, yinc, yorig, yref)
+        :rtype: tuple
+        """
         values = self.query(":WAVeform:PREamble?")
         # format: <format>,<type>,<points>,<count>,<xincrement>,<xorigin>,<xreference>,<yincrement>,<yorigin>,<yreference>
         # for example: 0,0,1200,1,2.000000e-05,-1.456000e-02,0,4.000000e-02,-75,127
@@ -106,10 +119,6 @@ class DS1054Z(vxi11.Instrument):
         #           127   yreference
         values = values.split(',')
         assert len(values) == 10
-        ## convert all to float:
-        #values  = (float(v) for v in values)
-        #fmt, typ, pnts, cnt, xinc, xorig, xref, yinc, yorig, yref = values
-        ## or some to int, some to float:
         fmt, typ, pnts, cnt, xref, yorig, yref  = (int(val) for val in values[:4] + values[6:7] + values[8:10])
         xinc, xorig, yinc = (float(val) for val in values[4:6] + values[7:8])
         return (fmt, typ, pnts, cnt, xinc, xorig, xref, yinc, yorig, yref)
@@ -117,7 +126,7 @@ class DS1054Z(vxi11.Instrument):
     def get_waveform_values(self, channel, mode='NORMal'):
         """
         Get waveform values for a specific channel.
-        Returns a list of floats representing the waveform in volts.
+        Returns the voltage samples of the waveform.
 
         If you set mode to RAW, the scope will be stopped first.
         Please start it again yourself, if you need to, afterwards.
@@ -125,7 +134,7 @@ class DS1054Z(vxi11.Instrument):
         :param channel: The channel name (like CHAN1, ...). Alternatively specify the channel by its number (as integer).
         :type channel: int or str
         :param str mode: can be NORMal, MAX, or RAW
-        :return: The waveform data
+        :return: voltage_samples
         :rtype: list of float
         """
 
@@ -138,8 +147,12 @@ class DS1054Z(vxi11.Instrument):
 
     def get_waveform_bytes(self, channel, mode='NORMal'):
         """
-        Get the bytes of waveform data for a specific channel
-        Automatically splits the request into chunks if total bytes would be too much.
+        Get the bytes of waveform data for a specific channel.
+
+        In most cases you would want to use the higher level function :py:meth:`get_waveform_values()` instead.
+
+        This function automatically splits the data request into chunks
+        if it cannot read all data in a single request.
 
         If you set mode to RAW, the scope will be stopped first.
         Please start it again yourself, if you need to, afterwards.
