@@ -2,8 +2,11 @@
 # ds1054z
 
 This package allows you to connect to your Rigol DS1054Z
-oscilloscope via Ethernet. It comes with a command line tool
-as well as with a class to control the scope with your own script.
+oscilloscope via Ethernet. It comes with a versatile command line tool.
+
+Off course, you can also to control the scope with your own script by using
+[the APIs](https://ds1054z.readthedocs.org/en/latest/api/index.html)
+this package has to offer.
 
 ## Installation
 
@@ -15,7 +18,8 @@ ds1054z depends on [python-vxi11](https://github.com/python-ivi/python-vxi11)
 which should automatically get installed along with itself.
 
 
-For more information on the installation, please consult the [installation section][] of the [package documentation][].
+For more information on the installation, please consult the
+[installation section][] of the [package documentation][].
 
 ## Features
 
@@ -30,7 +34,8 @@ For more information on the installation, please consult the [installation secti
 
 ### Command Line Tool
 
-This package installs a versatile command line (CLI) tool called `ds1054z`. You can use it to save the screen of your scope, for example:
+This package installs a versatile command line (CLI) tool called `ds1054z`.
+You can use it to save the screen of your scope, for example:
 
 ```bash
 ds1054z save-screen --overlay 0.6 192.168.0.23
