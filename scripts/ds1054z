@@ -2,9 +2,14 @@
 
 """
 CLI for the DS1054Z scope by Rigol
+
+This tool can be used in very versatile ways.
+Ask it for --help on the individual actions
+and it will tell you how to use them.
 """
 
 import argparse
+import textwrap
 import logging
 import time
 import io
@@ -42,7 +47,10 @@ def late_parents(self, parents):
             self._defaults.update(defaults)
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=textwrap.dedent(__doc__),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        )
     parser.add_argument('-v', '--verbose', action='store_true',
         help='More verbose output')
     parser.add_argument('--debug', action='store_true',
@@ -57,29 +65,44 @@ def main():
 
     subparsers = parser.add_subparsers(dest='action', metavar='<action>', help="Action to perform on the scope:")
 
+    # ds1054z discover
+    action_desc = 'Discover and list scopes on your network and exit'
     discover_parser = subparsers.add_parser('discover',
-        help='Discover and list scopes on your network and exit')
+        description=action_desc, help=action_desc)
+    # ds1054z save-screen
+    action_desc = 'Save an image of the screen'
     save_screen_parser = subparsers.add_parser('save-screen', parents=[device_parser],
-        help='Save an image of the screen')
+        description=action_desc, help=action_desc)
     save_screen_parser.add_argument('--filename', '-f', metavar='IMG_FILENAME',
         help='The filename template for the image')
     save_screen_parser.add_argument('--overlay', '-o', metavar='RATIO', type=float, default=0.5,
         help='Dim on-screen controls in --save-screen with a mask (default ratio: 0.5)')
-    property_parser = subparsers.add_parser('property',
-        help='Query properties of the DS1054Z instance')
+    # ds1054z property
+    action_desc = 'Query properties of the DS1054Z instance'
+    property_parser = subparsers.add_parser('property', description=action_desc, help=action_desc)
     property_parser.add_argument('properties', metavar='PROPERTY1,...', type=comma_sep,
         help='The properties to query (separated by a comma)')
     late_parents(property_parser, parents=[device_parser])
+    # ds1054z run
+    action_desc = 'Start the oscilloscope data acquisition'
     run_parser = subparsers.add_parser('run', parents=[device_parser],
-        help='Start the oscilloscope data acquisition')
+        description=action_desc, help=action_desc)
+    # ds1054z stop
+    action_desc = 'Stop the oscilloscope data acquisition'
     stop_parser = subparsers.add_parser('stop', parents=[device_parser],
-        help='Stop the oscilloscope data acquisition')
+        description=action_desc, help=action_desc)
+    # ds1054z single
+    action_desc = 'Set the oscilloscope to the single trigger mode.'
     single_parser = subparsers.add_parser('single', parents=[device_parser],
-        help='Set the oscilloscope to the single trigger mode.')
+        description=action_desc, help=action_desc)
+    # ds1054z tforce
+    action_desc = 'Generate a trigger signal forcefully.'
     tforce_parser = subparsers.add_parser('tforce', parents=[device_parser],
-        help='Generate a trigger signal forcefully.')
+        description=action_desc, help=action_desc)
+    # ds1054z shell
+    action_desc = 'Start an interactive shell to control your scope.'
     tforce_parser = subparsers.add_parser('shell', parents=[device_parser],
-        help='Start an interactive shell to control your scope.')
+        description=action_desc, help=action_desc)
     args = parser.parse_args()
 
     if args.debug:
