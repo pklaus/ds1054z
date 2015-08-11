@@ -168,7 +168,10 @@ def main():
             if args.verbose:
                 print('{0}: {1}'.format(prop, val))
             else:
-                print(val)
+                if type(val) in (list, tuple):
+                    print(' '.join(str(v) for v in val))
+                else:
+                    print(val)
 
     if args.action == 'save-screen':
         try:
