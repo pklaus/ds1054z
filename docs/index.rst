@@ -7,6 +7,8 @@ Thanks for reading the documentation of the Python package ds1054z.
 This software makes it easy to talk to your Rigol DS1054Z oscilloscope
 using Python.
 
+ds1054z is open source, `published on Github`_ by Philipp Klaus.
+
 It comes with a neat command line tool allowing you to control many
 functions of your scope such as grabbing waveforms or screenshots,
 or adjusting settings such as trigger, horizontol, or vertical setup.
@@ -28,4 +30,6 @@ Contents:
    using-the-cli
    using-the-class
    api/index
+
+.. _`published on Github`: https://github.com/pklaus/ds1054z
 
