@@ -69,6 +69,13 @@ def main():
     action_desc = 'Discover and list scopes on your network and exit'
     discover_parser = subparsers.add_parser('discover',
         description=action_desc, help=action_desc)
+    # ds1054z cmd
+    action_desc = 'Send an SCPI command to the oscilloscope'
+    cmd_parser = subparsers.add_parser('cmd',
+        description=action_desc, help=action_desc)
+    cmd_parser.add_argument('command', metavar=':SCPI:CMD',
+        help="The command to execute. If the command contains a '?' the answer will be read from the device and printed to stdout.")
+    late_parents(cmd_parser, parents=[device_parser])
     # ds1054z save-screen
     action_desc = 'Save an image of the screen'
     save_screen_parser = subparsers.add_parser('save-screen', parents=[device_parser],
@@ -145,6 +152,12 @@ def main():
             if args.verbose: print("Found a scope: {model} @ {ip}".format(**devices[0]))
             args.device = devices[0]['ip']
     ds = DS1054Z(args.device)
+
+    if args.action == 'cmd':
+        if '?' in args.command:
+            print(ds.query(args.command))
+        else:
+            ds.write(args.command)
 
     if args.action in ('run', 'stop', 'single', 'tforce'):
         getattr(ds, args.action)()
