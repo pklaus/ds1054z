@@ -33,9 +33,7 @@ For more information on the installation, please consult the [installation secti
 This package installs a versatile command line (CLI) tool called `ds1054z`. You can use it to save the screen of your scope, for example:
 
 ```bash
-ds1054z \
-  --save-screen 'default' --overlay 0.6 \
-  192.168.0.23
+ds1054z save-screen --overlay 0.6 192.168.0.23
 ```
 
 As a result, a file like this will be saved to your current working directory:
