@@ -39,7 +39,7 @@ As a result, a file like this will be saved to your current working directory:
 .. image:: images/ds1054z-scope-display.png
 
 Note that no oscilloscope IP address was specified in the last command.
-This works because as the tool performs discovery of DS1000Z devices
+This works because the tool performs discovery of DS1000Z devices
 on the local network. If it finds a single one, it picks that as your device.
 
 If you have multiple oscilloscopes in your network, or discovery
