@@ -38,7 +38,7 @@ ds1054z save-screen --overlay 0.6 192.168.0.23
 
 As a result, a file like this will be saved to your current working directory:
 
-![oscilloscope screenshot](doc/images/ds1054z-scope-display.png)
+![oscilloscope screenshot](docs/images/ds1054z-scope-display.png)
 
 Find out more ways to use the CLI tool with `ds1054z --help`
 
