@@ -20,6 +20,7 @@ The signature of the command line tool is as follows::
         discover     Discover and list scopes on your network and exit
         cmd          Send an SCPI command to the oscilloscope
         save-screen  Save an image of the screen
+        save-data    Save the waveform data to a file
         properties   Query properties of the DS1054Z instance
         run          Start the oscilloscope data acquisition
         stop         Stop the oscilloscope data acquisition
@@ -31,13 +32,19 @@ The signature of the command line tool is as follows::
       -h, --help     show this help message and exit
       -v, --verbose  More verbose output
 
-You can use it to save the screen of your scope, for example::
+Saving Screenshots
+------------------
+
+You can use the tool to save the screen of your scope, for example::
 
     ds1054z save-screen --overlay 0.6
 
 As a result, a file like this will be saved to your current working directory:
 
 .. image:: images/ds1054z-scope-display.png
+
+Zeroconf Device Discovery
+-------------------------
 
 Note that no oscilloscope IP address was specified in the last command.
 This works because the tool performs discovery of DS1000Z devices
@@ -49,5 +56,12 @@ then you can just as well specify its IP address or hostname as an
 positional parameter::
 
     ds1054z save-screen --overlay 0.6 192.168.0.23
+
+Exporting Data
+--------------
+
+You can save the waveform data to a file with the ``save-data`` command::
+
+    ds1054z save-data --filename samples_{ts}.txt
 
 .. _file a bug report: https://github.com/pklaus/ds1054z/issues
