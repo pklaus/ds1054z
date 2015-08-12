@@ -175,7 +175,10 @@ class DS1054Z(vxi11.Instrument):
         self.write(":WAVeform:SOURce " + channel)
         self.write(":WAVeform:FORMat BYTE")
         self.write(":WAVeform:MODE " + mode)
-        total = self.memory_depth
+        if mode.upper().startswith('NORM') or self.running:
+            total = 1200
+        else:
+            total = self.memory_depth
         buff = b""
         max_byte_len = 250000
         pos = 1
