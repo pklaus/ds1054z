@@ -15,6 +15,7 @@ import time
 import io
 from pkg_resources import resource_filename
 import sys
+import os
 
 from ds1054z import DS1054Z
 
@@ -183,6 +184,10 @@ def main():
         else: fmt = 'ds1054z-scope-display_{ts}.png'
         ts = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())
         filename = fmt.format(ts=ts)
+        # need to find out file extension for Pillow on Windows...
+        ext = os.path.splitext(filename)[1]
+        if not ext: parser.error('could not detect the image file type extension from the filename')
+        else: ext = ext[1:]
         # getting and saving the image
         im = Image.open(io.BytesIO(ds.display_data))
         overlay_filename = resource_filename("ds1054z","resources/overlay.png")
@@ -191,7 +196,7 @@ def main():
         overlay = Image.blend(alpha_100_percent, overlay, args.overlay)
         im.putalpha(255)
         im = Image.alpha_composite(im, overlay)
-        im.save(filename)
+        im.save(filename, format=ext)
         if not args.verbose: print(filename)
         else: print("Saved file: " + filename)
 
