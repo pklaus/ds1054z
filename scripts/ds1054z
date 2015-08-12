@@ -16,12 +16,19 @@ import io
 from pkg_resources import resource_filename
 import sys
 import os
+import itertools
 
 from ds1054z import DS1054Z
 
 # Py2 fix for input()
 try: input = raw_input
 except NameError: pass
+
+# Py2 fix for itertools.zip_longest()
+try:
+    zip_longest = itertools.zip_longest
+except AttributeError:
+    zip_longest = itertools.izip_longest
 
 SHELL_HOWTO = """
 Enter a command. It will be sent to the DS1054Z.
@@ -85,6 +92,17 @@ def main():
         help='The filename template for the image')
     save_screen_parser.add_argument('--overlay', '-o', metavar='RATIO', type=float, default=0.5,
         help='Dim on-screen controls in --save-screen with a mask (default ratio: 0.5)')
+    # ds1054z save-data
+    action_desc = 'Save the waveform data to a file'
+    save_data_parser = subparsers.add_parser('save-data', parents=[device_parser],
+        description=action_desc, help=action_desc)
+    save_data_parser.add_argument('--mode', default='NORMal', choices=('NORMal', 'MAXimum', 'RAW'),
+        help='The mode determins whether you will be reading the displayed samples (NORMal) '
+             'or stopping the scope and reading out the full memory (RAW). '
+             'MAXimum reads the full memory if the scope is already stopped and the displayed samples otherwise.')
+    save_data_parser.add_argument('--filename', '-f', metavar='FILENAME', default='ds1054z-scope-values_{ts}.csv',
+        help='The filename template for the data file.'
+             'Will try to derive the kind of file from the filename extension.')
     # ds1054z properties
     action_desc = 'Query properties of the DS1054Z instance'
     properties_parser = subparsers.add_parser('properties', description=action_desc, help=action_desc)
@@ -196,6 +214,39 @@ def main():
         im.putalpha(255)
         im = Image.alpha_composite(im, overlay)
         im.save(filename, format=ext[1:])
+        if not args.verbose: print(filename)
+        else: print("Saved file: " + filename)
+
+    if args.action == 'save-data':
+        ts = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())
+        filename = args.filename.format(ts=ts)
+        ext = os.path.splitext(filename)[1]
+        if not ext: parser.error('could not detect the file type extension from the filename')
+        kind = ext[1:]
+        if kind in ('csv', 'txt'):
+            import csv
+            data = []
+            channels = ds.displayed_channels
+            for channel in channels:
+                data.append(ds.get_waveform_samples(channel, mode=args.mode))
+            lengths = [len(samples) for samples in data]
+            if len(set(lengths)) != 1:
+                logger.error('Different number of samples read for different channels!')
+                sys.exit(1)
+            zip_longest
+            def csv_open(filename):
+                if sys.version_info >= (3, 0):
+                    return open(filename, 'w', newline='')
+                else:
+                    return open(filename, 'wb')
+            with csv_open(filename) as csv_file:
+                delimiter = ',' if kind == 'csv' else '\t'
+                csv_writer = csv.writer(csv_file, delimiter=delimiter)
+                csv_writer.writerow(channels)
+                for vals in zip_longest(*data):
+                    csv_writer.writerow(['{:.3e}'.format(val) for val in vals])
+        else:
+            parser.error('This tool cannot handle the requested --type')
         if not args.verbose: print(filename)
         else: print("Saved file: " + filename)
 
