@@ -10,17 +10,17 @@ this package has to offer.
 
 While this software is named after the entry level oscilloscope DS1054Z,
 there is no reason to believe it wouldn't also work with just any scope
-of the MSO1000Z and DS1000Z series by Rigol:
+of the DS1000Z and MSO1000Z series by Rigol:
 
-* MSO1104Z-S
-* MSO1074Z-S
-* MSO1104Z
-* MSO1074Z
-* DS1104Z-S Plus
-* DS1074Z-S Plus
-* DS1104Z Plus
-* DS1074Z Plus
 * DS1054Z
+* DS1074Z
+* DS1104Z
+* DS1074Z-S
+* DS1104Z-S
+* MSO1074Z
+* MSO1104Z
+* MSO1074Z-S
+* MSO1104Z-S
 
 ## Installation
 
