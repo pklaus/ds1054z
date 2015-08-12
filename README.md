@@ -59,7 +59,8 @@ As a result, a file like this will be saved to your current working directory:
 
 ![oscilloscope screenshot](docs/images/ds1054z-scope-display.png)
 
-Find out more ways to use the CLI tool with `ds1054z --help`
+You can find out more ways to use the CLI tool with `ds1054z --help`
+or by reading [the manual](http://ds1054z.readthedocs.org/en/stable/using-the-cli.html).
 
 ### Developers
 
