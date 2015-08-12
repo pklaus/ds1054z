@@ -4,8 +4,8 @@
 This package allows you to connect to your Rigol DS1054Z
 oscilloscope via Ethernet. It comes with a versatile command line tool.
 
-Off course, you can also to control the scope with your own script by using
-[the APIs](https://ds1054z.readthedocs.org/en/latest/api/index.html)
+Off course, you can also use it to control the scope with your own script by using
+[the API](https://ds1054z.readthedocs.org/en/stable/api/index.html)
 this package has to offer.
 
 While this software is named after the entry level oscilloscope DS1054Z,
