@@ -96,13 +96,16 @@ def main():
     action_desc = 'Save the waveform data to a file'
     save_data_parser = subparsers.add_parser('save-data', parents=[device_parser],
         description=action_desc, help=action_desc)
-    save_data_parser.add_argument('--mode', default='NORMal', choices=('NORMal', 'MAXimum', 'RAW'),
-        help='The mode determins whether you will be reading the displayed samples (NORMal) '
-             'or stopping the scope and reading out the full memory (RAW). '
-             'MAXimum reads the full memory if the scope is already stopped and the displayed samples otherwise.')
     save_data_parser.add_argument('--filename', '-f', metavar='FILENAME', default='ds1054z-scope-values_{ts}.csv',
-        help='The filename template for the data file.'
-             'Will try to derive the kind of file from the filename extension.')
+        help='The filename template for the data file. '
+             'The kind of file is determined by its filename extension. '
+             'Defaults to: ds1054z-scope-values_{ts}.csv')
+    save_data_parser.add_argument('--mode', default='NORMal', choices=('NORMal', 'MAXimum', 'RAW'),
+        help='The mode determins whether you will be reading the 1200 displayed samples (NORMal) '
+             'or stopping the scope and reading out the full memory (RAW). '
+             'MAXimum either reads the full memory if the scope is already stopped '
+             'or the 1200 displayed samples otherwise.'
+             'Defaults to NORMal.')
     # ds1054z properties
     action_desc = 'Query properties of the DS1054Z instance'
     properties_parser = subparsers.add_parser('properties', description=action_desc, help=action_desc)
