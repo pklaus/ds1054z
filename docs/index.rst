@@ -5,7 +5,7 @@ Welcome to ds1054z's documentation!
 
 Thanks for reading the documentation of the Python package ds1054z.
 This software makes it easy to talk to your Rigol DS1054Z oscilloscope
-using Python.
+or any DS1000Z / MSO1000Z series oscilloscope using Python.
 
 ds1054z is open source, `published on Github`_ by Philipp Klaus.
 
