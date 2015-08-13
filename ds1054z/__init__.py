@@ -71,7 +71,7 @@ class DS1054Z(vxi11.Instrument):
     def query(self, message, *args, **kwargs):
         """
         Write a message to the scope and read back the answer.
-        See vxi11.Instrument.ask() for optional parameters.
+        See :py:meth:`vxi11.Instrument.ask()` for optional parameters.
         """
         return self.ask(message, *args, **kwargs)
 
@@ -79,8 +79,12 @@ class DS1054Z(vxi11.Instrument):
         """
         Write a message to the scope and read a (binary) answer.
 
-        This is the slightly modified version of vxi11.Instrument.ask_raw().
+        This is the slightly modified version of :py:meth:`vxi11.Instrument.ask_raw()`.
         It takes a command message string and returns the answer as bytes.
+
+        :param str message: The SCPI command to send to the scope.
+        :return: Data read from the device
+        :rtype: bytes
         """
         data = message.encode(self.ENCODING)
         return self.ask_raw(data, *args, **kwargs)
@@ -93,7 +97,7 @@ class DS1054Z(vxi11.Instrument):
 
     @property
     def running(self):
-        return self.ask(':TRIGger:STATus?') in ('TD', 'WAIT', 'RUN', 'AUTO')
+        return self.query(':TRIGger:STATus?') in ('TD', 'WAIT', 'RUN', 'AUTO')
 
     @property
     def waveform_preamble(self):
