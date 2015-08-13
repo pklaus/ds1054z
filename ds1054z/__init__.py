@@ -193,18 +193,23 @@ class DS1054Z(vxi11.Instrument):
             end_pos = min(total, pos+max_byte_len-1)
             self.write(":WAVeform:STOP {}".format(end_pos))
             tmp_buff = self.query_raw(":WAVeform:DATA?")
-            buff += DS1054Z._clean_tmc_header(tmp_buff)
+            buff += DS1054Z.decode_ieee_block(tmp_buff)
             pos += max_byte_len
         return buff
 
     @staticmethod
-    def _clean_tmc_header(tmc_data):
+    def decode_ieee_block(ieee_bytes):
+        """
+        Strips headers (and trailing bytes) from a IEEE binary data block off.
+
+        Named after :any:`decode_ieee_block` in python-ivi
+        """
         if sys.version_info >= (3, 0):
-            n_header_bytes = int(chr(tmc_data[1]))+2
+            n_header_bytes = int(chr(ieee_bytes[1]))+2
         else:
-            n_header_bytes = int(tmc_data[1])+2
-        n_data_bytes = int(tmc_data[2:n_header_bytes].decode('ascii'))
-        return tmc_data[n_header_bytes:n_header_bytes + n_data_bytes]
+            n_header_bytes = int(ieee_bytes[1])+2
+        n_data_bytes = int(ieee_bytes[2:n_header_bytes].decode('ascii'))
+        return ieee_bytes[n_header_bytes:n_header_bytes + n_data_bytes]
 
     @property
     def idn(self):
@@ -255,7 +260,7 @@ class DS1054Z(vxi11.Instrument):
         logger.info("read {} bytes in .display_data".format(len(buff)))
         if len(buff) != self.DISPLAY_DATA_BYTES:
             raise NameError("display_data: didn't receive the right number of bytes")
-        return DS1054Z._clean_tmc_header(buff)
+        return DS1054Z.decode_ieee_block(buff)
 
     @property
     def displayed_channels(self):
