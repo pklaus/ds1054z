@@ -13,7 +13,7 @@ import textwrap
 import logging
 import time
 import io
-from pkg_resources import resource_filename
+import pkg_resources
 import sys
 import os
 import itertools
@@ -59,8 +59,10 @@ def main():
         description=textwrap.dedent(__doc__),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         )
-    parser.add_argument('-v', '--verbose', action='store_true',
+    parser.add_argument('--verbose', action='store_true',
         help='More verbose output')
+    parser.add_argument('--version', action='store_true',
+        help=argparse.SUPPRESS)
     parser.add_argument('--debug', action='store_true',
         #help='Enable debugging output',
         help=argparse.SUPPRESS,
@@ -138,6 +140,10 @@ def main():
     tforce_parser = subparsers.add_parser('shell', parents=[device_parser],
         description=action_desc, help=action_desc)
     args = parser.parse_args()
+
+    if args.version:
+        print(pkg_resources.get_distribution("ds1054z").version)
+        sys.exit(0)
 
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
@@ -218,7 +224,7 @@ def main():
         if not ext: parser.error('could not detect the image file type extension from the filename')
         # getting and saving the image
         im = Image.open(io.BytesIO(ds.display_data))
-        overlay_filename = resource_filename("ds1054z","resources/overlay.png")
+        overlay_filename = pkg_resources.resource_filename("ds1054z","resources/overlay.png")
         overlay = Image.open(overlay_filename)
         alpha_100_percent =  Image.new(overlay.mode, overlay.size, color=(0,0,0,0))
         overlay = Image.blend(alpha_100_percent, overlay, args.overlay)
