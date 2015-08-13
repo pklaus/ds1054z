@@ -31,6 +31,7 @@ class DS1054Z(vxi11.Instrument):
     IDN_PATTERN = r'^RIGOL TECHNOLOGIES,DS1\d\d\dZ,'
     ENCODING = 'utf-8'
     H_GRID = 12
+    SAMPLES_ON_DISPLAY = 1200
     DISPLAY_DATA_BYTES = 1152068
 
     def __init__(self, host, *args, **kwargs):
@@ -164,7 +165,7 @@ class DS1054Z(vxi11.Instrument):
         :rtype: list of float values
         """
 
-        buff = self.get_waveform_bytes(channel, mode)
+        buff = self.get_waveform_bytes(channel, mode=mode)
         fmt, typ, pnts, cnt, xinc, xorig, xref, yinc, yorig, yref = self.waveform_preamble
         data = struct.unpack(str(len(buff))+'B', buff)
         data = list(data)
@@ -177,36 +178,88 @@ class DS1054Z(vxi11.Instrument):
         (In most cases you would want to use the higher level
         function :py:meth:`get_waveform_samples()` instead.)
 
-        This function automatically splits the data request into chunks
-        if it cannot read all data in a single request.
+        This function distinguishes between requests for reading
+        the waveform data currently being displayed on the screen
+        or if you will be reading the internal memory.
+        If you set mode to RAW, the scope will be stopped first and
+        you will get the bytes from internal memory.
+        (Please start it again yourself, if you need to, afterwards.)
+        If you set the mode to MAXimum this function will return the
+        internal memory if the scope is stopped, and the screen
+        memory otherwise.
 
-        If you set mode to RAW, the scope will be stopped first.
-        Please start it again yourself, if you need to, afterwards.
+        In case the internal memory will be read, the data request will
+        automatically be split into chunks if it's impossible to read
+        all bytes at once.
 
         :param channel: The channel name (like CHAN1, ...). Alternatively specify the channel by its number (as integer).
         :type channel: int or str
-        :param str mode: can be NORMal, MAX, or RAW
+        :param str mode: can be NORMal, MAXimum, or RAW
         :return: The waveform data
         :rtype: bytes
         """
         channel = self._interpret_channel(channel)
-        if mode == 'RAW':
-            if self.running:
-                self.stop()
+        if mode.upper().startswith('NORM') or (self.running and mode.upper().startswith('MAX')):
+            return self._get_waveform_bytes_screen(channel, mode=mode)
+        else:
+            return self._get_waveform_bytes_internal(channel, mode=mode)
+
+    def _get_waveform_bytes_screen(self, channel, mode='NORMal'):
+        """
+        This function returns the waveform bytes from the scope if you desire
+        to read the bytes corresponding to the screen content.
+        """
+        channel = self._interpret_channel(channel)
+        assert mode.upper().startswith('NOR') or mode.upper().startswith('MAX')
         self.write(":WAVeform:SOURce " + channel)
         self.write(":WAVeform:FORMat BYTE")
         self.write(":WAVeform:MODE " + mode)
-        if mode.upper().startswith('NORM') or self.running:
-            total = 1200
-        else:
-            total = self.memory_depth
+        wp = self.waveform_preamble_dict
+        pnts = wp['pnts']
+        starting_at = 1
+        if pnts < self.SAMPLES_ON_DISPLAY:
+            """
+            The waveform seems to be stopped and starting or ending inside the
+            visible screen area due to horizontal scrolling.
+            We will not get back the expected 1200 samples in this case.
+            Thus, a fix is needed to determine at which side the samples are missing.
+            """
+            self.write(":WAVeform:STARt {}".format(self.SAMPLES_ON_DISPLAY))
+            self.write(":WAVeform:STARt 1")
+            if int(self.query(":WAVeform:STARt?")) != 1:
+                starting_at = self.SAMPLES_ON_DISPLAY - pnts + 1
+                self.write(":WAVeform:STARt {}".format(starting_at))
+        tmp_buff = self.query_raw(":WAVeform:DATA?")
+        buff = DS1054Z.decode_ieee_block(tmp_buff)
+        assert len(buff) == pnts
+        if pnts < self.SAMPLES_ON_DISPLAY:
+            zero_bytes = bytes([wp['yref']]) * (self.SAMPLES_ON_DISPLAY - pnts)
+            if starting_at == 1:
+                buff += zero_bytes
+            else:
+                buff = zero_bytes + buff
+        return buff
+
+    def _get_waveform_bytes_internal(self, channel, mode='RAW'):
+        """
+        This function returns the waveform bytes from the scope if you desire
+        to read the bytes corresponding to the internal (deep) memory.
+        """
+        channel = self._interpret_channel(channel)
+        assert mode.upper().startswith('MAX') or mode.upper().startswith('RAW')
+        if self.running:
+            self.stop()
+        self.write(":WAVeform:SOURce " + channel)
+        self.write(":WAVeform:FORMat BYTE")
+        self.write(":WAVeform:MODE " + mode)
+        wp = self.waveform_preamble_dict
+        pnts = wp['pnts']
         buff = b""
         max_byte_len = 250000
         pos = 1
-        while len(buff) < total:
-            remaining =  total - len(buff)
+        while len(buff) < pnts:
             self.write(":WAVeform:STARt {}".format(pos))
-            end_pos = min(total, pos+max_byte_len-1)
+            end_pos = min(pnts, pos+max_byte_len-1)
             self.write(":WAVeform:STOP {}".format(end_pos))
             tmp_buff = self.query_raw(":WAVeform:DATA?")
             buff += DS1054Z.decode_ieee_block(tmp_buff)
