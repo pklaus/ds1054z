@@ -175,7 +175,7 @@ class DS1054Z(vxi11.Instrument):
         """
         Get the waveform data for a specific channel as :py:obj:`bytes`.
         (In most cases you would want to use the higher level
-        function :py:meth:`get_waveform_values()` instead.)
+        function :py:meth:`get_waveform_samples()` instead.)
 
         This function automatically splits the data request into chunks
         if it cannot read all data in a single request.
