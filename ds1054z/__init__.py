@@ -96,12 +96,15 @@ class DS1054Z(vxi11.Instrument):
     @property
     def waveform_preamble(self):
         """
-        Returns a tuple of length 10 with the values returned by the command
-        ``:WAVeform:PREamble?`` parsed as floats and ints.
+        Provides the values returned by the command ``:WAVeform:PREamble?``.
+        They will be converted to floats and ints as appropriate.
 
         They are essential values if you want to convert BYTE data from the scope
         to voltage readings or if you want to recreate the scope's
         display content programmatically.
+
+        This property is also accessible via the wrapper property :py:attr:`waveform_preamble_dict`
+        where it returns a :py:obj:`dict` instead of a :py:obj:`tuple`.
 
         This property will be fetched from the scope every time you access it.
 
@@ -109,6 +112,7 @@ class DS1054Z(vxi11.Instrument):
         :rtype: tuple
         """
         values = self.query(":WAVeform:PREamble?")
+        # from the Programming Guide:
         # format: <format>,<type>,<points>,<count>,<xincrement>,<xorigin>,<xreference>,<yincrement>,<yorigin>,<yreference>
         # for example: 0,0,1200,1,2.000000e-05,-1.456000e-02,0,4.000000e-02,-75,127
         #
@@ -127,6 +131,18 @@ class DS1054Z(vxi11.Instrument):
         fmt, typ, pnts, cnt, xref, yorig, yref  = (int(val) for val in values[:4] + values[6:7] + values[8:10])
         xinc, xorig, yinc = (float(val) for val in values[4:6] + values[7:8])
         return (fmt, typ, pnts, cnt, xinc, xorig, xref, yinc, yorig, yref)
+
+    @property
+    def waveform_preamble_dict(self):
+        """
+        Provides a dictionary with 10 entries corresponding to the
+        tuple items of the property :py:attr:`waveform_preamble`.
+
+        :return: {'fmt', 'typ', 'pnts', 'cnt', 'xinc', 'xorig', 'xref', 'yinc', 'yorig', 'yref'}
+        :rtype: dict
+        """
+        keys = 'fmt, typ, pnts, cnt, xinc, xorig, xref, yinc, yorig, yref'.split(',', )
+        return dict(zip(keys, self.waveform_preamble))
 
     def get_waveform_samples(self, channel, mode='NORMal'):
         """
