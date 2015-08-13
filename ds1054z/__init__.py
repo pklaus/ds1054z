@@ -217,10 +217,12 @@ class DS1054Z(vxi11.Instrument):
         wp = self.waveform_preamble_dict
         pnts = wp['pnts']
         starting_at = 1
+        stopping_at = self.SAMPLES_ON_DISPLAY
         if pnts < self.SAMPLES_ON_DISPLAY:
             """
-            The waveform seems to be stopped and starting or ending inside the
-            visible screen area due to horizontal scrolling.
+            The oscilloscope seems to be stopped and in addition
+            the waveform is not going all the way from the left to the
+            right end of the screen (due to horizontal scrolling).
             We will not get back the expected 1200 samples in this case.
             Thus, a fix is needed to determine at which side the samples are missing.
             """
@@ -228,7 +230,10 @@ class DS1054Z(vxi11.Instrument):
             self.write(":WAVeform:STARt 1")
             if int(self.query(":WAVeform:STARt?")) != 1:
                 starting_at = self.SAMPLES_ON_DISPLAY - pnts + 1
-                self.write(":WAVeform:STARt {}".format(starting_at))
+            else:
+                stopping_at = pnts
+        self.write(":WAVeform:STARt {}".format(starting_at))
+        self.write(":WAVeform:STOP {}".format(stopping_at))
         tmp_buff = self.query_raw(":WAVeform:DATA?")
         buff = DS1054Z.decode_ieee_block(tmp_buff)
         assert len(buff) == pnts
