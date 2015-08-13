@@ -44,6 +44,7 @@ class DS1054Z(vxi11.Instrument):
         self.product = idn[1]
         self.serial = idn[2]
         self.firmware = idn[3]
+        self.mask_begin_num = None
 
     def clock(self):
         return clock() - self.start
@@ -158,6 +159,12 @@ class DS1054Z(vxi11.Instrument):
         If you set mode to RAW, the scope will be stopped first.
         Please start it again yourself, if you need to, afterwards.
 
+        If you set mode to NORMal you will always get 1200 samples back.
+        Those 1200 points represent the waveform over the full screen width.
+        This can happend when you stop the acquisition and move the waveform
+        horizontally so that it starts or ends inside the screen area,
+        the missing data points are being set to float('nan') in the list.
+
         :param channel: The channel name (like 'CHAN1' or 1).
         :type channel: int or str
         :param str mode: can be 'NORMal', 'MAX', or 'RAW'
@@ -167,10 +174,16 @@ class DS1054Z(vxi11.Instrument):
 
         buff = self.get_waveform_bytes(channel, mode=mode)
         fmt, typ, pnts, cnt, xinc, xorig, xref, yinc, yorig, yref = self.waveform_preamble
-        data = struct.unpack(str(len(buff))+'B', buff)
-        data = list(data)
-        data = [(val - yorig - yref)*yinc for val in data]
-        return data
+        samples = list(struct.unpack(str(len(buff))+'B', buff))
+        samples = [(val - yorig - yref)*yinc for val in samples]
+        if self.mask_begin_num:
+            at_begin = self.mask_begin_num[0]
+            num = self.mask_begin_num[1]
+            if at_begin:
+                samples = [float('nan')] * num + samples[num:]
+            else:
+                samples = samples[:-num] + [float('nan')] * num
+        return samples
 
     def get_waveform_bytes(self, channel, mode='NORMal'):
         """
@@ -238,13 +251,18 @@ class DS1054Z(vxi11.Instrument):
         buff = DS1054Z.decode_ieee_block(tmp_buff)
         assert len(buff) == pnts
         if pnts < self.SAMPLES_ON_DISPLAY:
-            logger.warning('Accessing screen values when the waveform is not entirely ')
-            logger.warning('filling the screen - padding missing bytes with 0x00!')
-            zero_bytes = b"\x00" * (self.SAMPLES_ON_DISPLAY - pnts)
+            logger.info('Accessing screen values when the waveform is not entirely ')
+            logger.info('filling the screen - padding missing bytes with 0x00!')
+            num = self.SAMPLES_ON_DISPLAY - pnts
+            zero_bytes = b"\x00" * num
             if starting_at == 1:
                 buff += zero_bytes
+                self.mask_begin_num = (0, num)
             else:
                 buff = zero_bytes + buff
+                self.mask_begin_num = (1, num)
+        else:
+            self.mask_begin_num = None
         return buff
 
     def _get_waveform_bytes_internal(self, channel, mode='RAW'):
