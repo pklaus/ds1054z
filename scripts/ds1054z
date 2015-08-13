@@ -116,7 +116,7 @@ def main():
     action_desc = 'Query properties of the DS1054Z instance'
     properties_parser = subparsers.add_parser('properties', description=action_desc, help=action_desc)
     properties_parser.add_argument('properties', metavar='PROPERTIES', type=comma_sep,
-        help="The properties to query separated by a comma, like: 'idn,memory_depth'. "
+        help="The properties to query separated by a comma, like: 'idn,internal_memory_depth_total'. "
              "Asking for a single one will also work, off course.")
     late_parents(properties_parser, parents=[device_parser])
     # ds1054z run

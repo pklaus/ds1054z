@@ -295,6 +295,55 @@ class DS1054Z(vxi11.Instrument):
             pos += max_byte_len
         return buff
 
+    @property
+    def timebase_scale(self):
+        return float(self.query(':TIMebase:MAIN:SCALe?'))
+
+    @property
+    def sample_rate(self):
+        return float(self.query(':ACQuire:SRATe?'))
+
+    @property
+    def waveform_time_values(self):
+        """
+        The timestamps that belong to the waveform samples accessed to
+        to be accessed beforehand.
+
+        Access this property only after fetching your waveform data,
+        otherwise the values will not be correct.
+
+        Will be fetched every time you access this property.
+
+        :return: sample timestamps (in seconds)
+        :rtype: list of float
+        """
+        wp = self.waveform_preamble_dict
+        tv = []
+        for i in range(self.curr_waveform_memory_depth):
+            tv.append(wp['xinc'] * i + wp['xorig'])
+        return tv
+
+    @staticmethod
+    def format_time(seconds, as_unicode=True, number_format='{:.6f}'):
+        """
+        Formats the time given in seconds in a nice human readable form
+        adding ns, ms, us, or s at the end
+        """
+        units = [(1e0, 's'), (1e-3, 'ms'), (1e-6, 'us'), (1e-9, 'ns')]
+        formatted_time = None
+        for unit in units:
+            if abs(seconds) < unit[0]:
+                continue
+            formatted_time = [number_format.format(seconds / unit[0]), unit[1]]
+            break
+        if not formatted_time:
+            formatted_time = ['{}'.format(seconds / units[-1][0]), units[-1][1]]
+        formatted_time[0] = formatted_time[0].rstrip('0').rstrip('.')
+        formatted_time = ' '.join(formatted_time)
+        if as_unicode:
+            formatted_time = formatted_time.replace('us', 'µs')
+        return formatted_time
+
     @staticmethod
     def decode_ieee_block(ieee_bytes):
         """
@@ -333,17 +382,58 @@ class DS1054Z(vxi11.Instrument):
         """ Generate a trigger signal forcefully. """
         self.write(":TFORce")
 
+    def set_waveform_mode(self, mode='NORMal'):
+        """ Changing the waveform mode """
+        self.write('WAVeform:MODE ' + mode)
+
     @property
-    def memory_depth(self):
+    def curr_waveform_memory_depth(self):
         """
-        The current memory depth of the oscilloscope as float.
+        The current memory depth of the oscilloscope.
+        This value is the number of samples to expect when reading the
+        waveform data and depends on the status of the scope (running / stopped).
+
+        Needed by :py:meth:`waveform_time_values`.
+
+        This property will be updated every time you access it.
+        """
+        if self.query(':WAVeform:MODE?').startswith('NORM') or self.running:
+            return self.SAMPLES_ON_DISPLAY
+        else:
+            return self.internal_memory_depth_total
+
+    @property
+    def internal_memory_depth_currently_shown(self):
+        """
+        The number of samples in the **raw (=deep) memory** of the oscilloscope
+        which are **currently being displayed on the screen**.
+
         This property will be updated every time you access it.
         """
         mdep = self.query(":ACQuire:MDEPth?")
         if mdep == "AUTO":
-            srate = self.query(":ACQuire:SRATe?")
-            scal = self.query(":TIMebase:MAIN:SCALe?")
-            mdep = self.H_GRID * float(scal) * float(srate)
+            srate = self.sample_rate
+            scal = self.timebase_scale
+            mdep = srate * scal * self.H_GRID
+        return int(float(mdep))
+
+    @property
+    def internal_memory_depth_total(self):
+        """
+        The total number of samples in the **raw (=deep) memory** of the oscilloscope.
+
+        This property will be updated every time you access it.
+        """
+        mdep = self.query(":ACQuire:MDEPth?")
+        if mdep == "AUTO":
+            curr_mode = self.query(':WAVeform:MODE?')
+            if not curr_mode.startswith('RAW'):
+                """in this case we need to switch to RAW mode to find out the memory_depth"""
+                self.write(':WAVeform:MODE RAW')
+                mdep = self.waveform_preamble_dict['pnts']
+                self.write(':WAVeform:MODE ' + curr_mode)
+            else:
+                mdep = self.waveform_preamble_dict['pnts']
         return int(float(mdep))
 
     @property
