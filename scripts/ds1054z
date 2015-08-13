@@ -77,6 +77,10 @@ def main():
     action_desc = 'Discover and list scopes on your network and exit'
     discover_parser = subparsers.add_parser('discover',
         description=action_desc, help=action_desc)
+    # ds1054z info
+    action_desc = 'Print information about your oscilloscope'
+    cmd_parser = subparsers.add_parser('info', parents=[device_parser],
+        description=action_desc, help=action_desc)
     # ds1054z cmd
     action_desc = 'Send an SCPI command to the oscilloscope'
     cmd_parser = subparsers.add_parser('cmd',
@@ -174,6 +178,10 @@ def main():
             if args.verbose: print("Found a scope: {model} @ {ip}".format(**devices[0]))
             args.device = devices[0]['ip']
     ds = DS1054Z(args.device)
+
+    if args.action == 'info':
+        fmt = "\nVendor:   {0}\nProduct:  {1}\nSerial:   {2}\nFirmware: {3}\n"
+        print(fmt.format(ds.vendor, ds.product, ds.serial, ds.firmware))
 
     if args.action == 'cmd':
         if '?' in args.command:
