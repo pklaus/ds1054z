@@ -238,7 +238,9 @@ class DS1054Z(vxi11.Instrument):
         buff = DS1054Z.decode_ieee_block(tmp_buff)
         assert len(buff) == pnts
         if pnts < self.SAMPLES_ON_DISPLAY:
-            zero_bytes = bytes([wp['yref']]) * (self.SAMPLES_ON_DISPLAY - pnts)
+            logger.warning('Accessing screen values when the waveform is not entirely ')
+            logger.warning('filling the screen - padding missing bytes with 0x00!')
+            zero_bytes = b"\x00" * (self.SAMPLES_ON_DISPLAY - pnts)
             if starting_at == 1:
                 buff += zero_bytes
             else:
