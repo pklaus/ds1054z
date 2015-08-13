@@ -4,5 +4,6 @@
 .. autoclass:: ds1054z.DS1054Z
     :members:
     :show-inheritance:
+    :member-order: bysource
 
 
