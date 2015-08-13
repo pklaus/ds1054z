@@ -21,6 +21,11 @@ except:
 class DS1054Z(vxi11.Instrument):
     """
     This class represents the oscilloscope.
+
+    :ivar product: like ``'DS1054Z'`` (depending on your device)
+    :ivar vendor:  should be ``'RIGOL TECHNOLOGIES'``
+    :ivar serial:  e.g. ``'DS1ZA118171631'``
+    :ivar firmware: e.g. ``'00.04.03.SP1'``
     """
 
     IDN_PATTERN = r'^RIGOL TECHNOLOGIES,DS1\d\d\dZ,'
