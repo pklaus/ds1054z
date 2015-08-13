@@ -11,8 +11,8 @@ import shlex
 project = 'ds1054z'
 copyright = '2015, Philipp Klaus'
 author = 'Philipp Klaus'
-version = 'v0.2.2'
-release = 'v0.2.2'
+version = 'v0.3.dev'
+release = 'v0.3.dev'
 
 extensions = ['sphinx.ext.autodoc',]
 templates_path = ['_templates']
