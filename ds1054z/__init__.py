@@ -141,7 +141,7 @@ class DS1054Z(vxi11.Instrument):
         :return: {'fmt', 'typ', 'pnts', 'cnt', 'xinc', 'xorig', 'xref', 'yinc', 'yorig', 'yref'}
         :rtype: dict
         """
-        keys = 'fmt, typ, pnts, cnt, xinc, xorig, xref, yinc, yorig, yref'.split(',', )
+        keys = 'fmt, typ, pnts, cnt, xinc, xorig, xref, yinc, yorig, yref'.split(', ')
         return dict(zip(keys, self.waveform_preamble))
 
     def get_waveform_samples(self, channel, mode='NORMal'):
