@@ -324,25 +324,28 @@ class DS1054Z(vxi11.Instrument):
         return tv
 
     @staticmethod
-    def format_time(seconds, as_unicode=True, number_format='{:.6f}'):
+    def format_si_prefix(number, unit=None, as_unicode=True, number_format='{:.6f}'):
         """
-        Formats the time given in seconds in a nice human readable form
-        adding ns, ms, us, or s at the end
+        Formats the a number with a metric prefix
+        giving a nice human readable form.
         """
-        units = [(1e0, 's'), (1e-3, 'ms'), (1e-6, 'us'), (1e-9, 'ns')]
-        formatted_time = None
-        for unit in units:
-            if abs(seconds) < unit[0]:
+        prefixes  = [( 1e9, 'G'), ( 1e6, 'M'), ( 1e3, 'k'), (  1e0, '' )]
+        prefixes += [(1e-3, 'm'), (1e-6, 'u'), (1e-9, 'n'), (1e-12, 'p')]
+        formatted_number = None
+        for prefix in prefixes:
+            if abs(number) < prefix[0]:
                 continue
-            formatted_time = [number_format.format(seconds / unit[0]), unit[1]]
+            formatted_number = [number_format.format(number / prefix[0]), prefix[1]]
             break
-        if not formatted_time:
-            formatted_time = ['{}'.format(seconds / units[-1][0]), units[-1][1]]
-        formatted_time[0] = formatted_time[0].rstrip('0').rstrip('.')
-        formatted_time = ' '.join(formatted_time)
+        if not formatted_number:
+            formatted_number = ['{}'.format(number / prefixes[-1][0]), prefixes[-1][1]]
+        formatted_number[0] = formatted_number[0].rstrip('0').rstrip('.')
+        formatted_number = ' '.join(formatted_number)
         if as_unicode:
-            formatted_time = formatted_time.replace('us', 'µs')
-        return formatted_time
+            formatted_number = formatted_number.replace('u', 'µ')
+        if unit:
+            formatted_number += unit
+        return formatted_number
 
     @staticmethod
     def decode_ieee_block(ieee_bytes):
