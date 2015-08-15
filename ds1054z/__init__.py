@@ -103,9 +103,9 @@ class DS1054Z(vxi11.Instrument):
     def waveform_preamble(self):
         """
         Provides the values returned by the command ``:WAVeform:PREamble?``.
-        They will be converted to floats and ints as appropriate.
+        They will be converted to float and int as appropriate.
 
-        They are essential values if you want to convert BYTE data from the scope
+        Those values are essential if you want to convert BYTE data from the scope
         to voltage readings or if you want to recreate the scope's
         display content programmatically.
 
@@ -115,11 +115,13 @@ class DS1054Z(vxi11.Instrument):
         This property will be fetched from the scope every time you access it.
 
         :return: (fmt, typ, pnts, cnt, xinc, xorig, xref, yinc, yorig, yref)
-        :rtype: tuple
+        :rtype: tuple of float and int values
         """
         values = self.query(":WAVeform:PREamble?")
-        # from the Programming Guide:
+        #
+        # From the Programming Guide:
         # format: <format>,<type>,<points>,<count>,<xincrement>,<xorigin>,<xreference>,<yincrement>,<yorigin>,<yreference>
+        #
         # for example: 0,0,1200,1,2.000000e-05,-1.456000e-02,0,4.000000e-02,-75,127
         #
         #             0   format      0 (BYTE), 1 (WORD) or 2 (ASC)
@@ -132,6 +134,7 @@ class DS1054Z(vxi11.Instrument):
         #  4.000000e-02   yincrement
         #           -75   yorigin
         #           127   yreference
+        #
         values = values.split(',')
         assert len(values) == 10
         fmt, typ, pnts, cnt, xref, yorig, yref  = (int(val) for val in values[:4] + values[6:7] + values[8:10])
@@ -143,6 +146,8 @@ class DS1054Z(vxi11.Instrument):
         """
         Provides a dictionary with 10 entries corresponding to the
         tuple items of the property :py:attr:`waveform_preamble`.
+
+        This property will be fetched from the scope every time you access it.
 
         :return: {'fmt', 'typ', 'pnts', 'cnt', 'xinc', 'xorig', 'xref', 'yinc', 'yorig', 'yref'}
         :rtype: dict
