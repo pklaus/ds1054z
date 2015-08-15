@@ -49,7 +49,7 @@ class DS1054Z(vxi11.Instrument):
         self.serial = idn[2]
         self.firmware = idn[3]
         self.mask_begin_num = None
-        self.populate_possible_timebase_values()
+        self._populate_possible_timebase_values()
 
     def clock(self):
         return clock() - self.start
@@ -305,11 +305,12 @@ class DS1054Z(vxi11.Instrument):
             pos += max_byte_len
         return buff
 
-    def populate_possible_timebase_values(self):
+    def _populate_possible_timebase_values(self):
         """
-        possible values:
-          5 ns  to  50 s  in 1-2-5 steps
-        200 ms  to  50 s  in 1-2-5 steps
+        Populates the list of possible timebase values.
+
+        Uses the MIN_TIMEBASE, MAX_TIMEBASE, and TIMEBASE_MANTISSAE
+        attributes to do so.
         """
         possible_timebase_values = []
         # initialize with the decimal mantissa and exponent for self.MIN_TIMEBASE
