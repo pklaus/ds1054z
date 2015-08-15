@@ -362,6 +362,7 @@ class DS1054Z(vxi11.Instrument):
         If you provide a unit, it will be appended to the resulting string.
 
         Example:
+
         >>> DS1054Z.format_si_prefix(2E-9, unit='s')
         '2 ns'
         """
