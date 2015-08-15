@@ -390,7 +390,7 @@ class DS1054Z(vxi11.Instrument):
         Strips headers (and trailing bytes) from a IEEE binary data block off.
 
         This is the block format commands like ``:WAVeform:DATA?``, ``:DISPlay:DATA?``,
-        ``:SYSTem:SETup?``, and ``:ETABle<n>:DATA?`` return their data as.
+        ``:SYSTem:SETup?``, and ``:ETABle<n>:DATA?`` return their data in.
 
         Named after ``decode_ieee_block()`` in python-ivi
         """

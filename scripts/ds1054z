@@ -73,7 +73,8 @@ def main():
         help='The device string. Typically the IP address of the oscilloscope. '
              'Will try to discover a single (!) scope on the network if you leave it out.')
 
-    subparsers = parser.add_subparsers(dest='action', metavar='<action>', help="Action to perform on the scope:")
+    subparsers = parser.add_subparsers(dest='action', metavar='<action>',
+        help="Action to perform on the scope:")
 
     # ds1054z discover
     action_desc = 'Discover and list scopes on your network and exit'
@@ -88,7 +89,8 @@ def main():
     cmd_parser = subparsers.add_parser('cmd',
         description=action_desc, help=action_desc)
     cmd_parser.add_argument('command', metavar=':SCPI:CMD',
-        help="The command to execute. If the command contains a '?' the answer will be read from the device and printed to stdout.")
+        help="The command to execute. If the command contains a '?' the answer "
+             "will be read from the device and printed to stdout.")
     late_parents(cmd_parser, parents=[device_parser])
     # ds1054z save-screen
     action_desc = 'Save an image of the screen'
@@ -102,7 +104,8 @@ def main():
     action_desc = 'Save the waveform data to a file'
     save_data_parser = subparsers.add_parser('save-data', parents=[device_parser],
         description=action_desc, help=action_desc)
-    save_data_parser.add_argument('--filename', '-f', metavar='FILENAME', default='ds1054z-scope-values_{ts}.csv',
+    save_data_parser.add_argument('--filename', '-f',
+        metavar='FILENAME', default='ds1054z-scope-values_{ts}.csv',
         help='The filename template for the data file. '
              'The kind of file is determined by its filename extension. '
              'Defaults to: ds1054z-scope-values_{ts}.csv')
