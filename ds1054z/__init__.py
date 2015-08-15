@@ -34,6 +34,9 @@ class DS1054Z(vxi11.Instrument):
     H_GRID = 12
     SAMPLES_ON_DISPLAY = 1200
     DISPLAY_DATA_BYTES = 1152068
+    MIN_TIMEBASE = 5E-9
+    MAX_TIMEBASE = 50E0
+    TIMEBASE_MANTISSAE = (1, 2, 5)
 
     def __init__(self, host, *args, **kwargs):
         self.start = clock()
@@ -46,6 +49,7 @@ class DS1054Z(vxi11.Instrument):
         self.serial = idn[2]
         self.firmware = idn[3]
         self.mask_begin_num = None
+        self.populate_possible_timebase_values()
 
     def clock(self):
         return clock() - self.start
@@ -301,9 +305,37 @@ class DS1054Z(vxi11.Instrument):
             pos += max_byte_len
         return buff
 
+    def populate_possible_timebase_values(self):
+        """
+        possible values:
+          5 ns  to  50 s  in 1-2-5 steps
+        200 ms  to  50 s  in 1-2-5 steps
+        """
+        possible_timebase_values = []
+        # initialize with the decimal mantissa and exponent for self.MIN_TIMEBASE
+        mantissa_idx = self.TIMEBASE_MANTISSAE.index(int(str(self.MIN_TIMEBASE)[0]))
+        exponent = int('{0:e}'.format(self.MIN_TIMEBASE).split('e')[1])
+        value = self.MIN_TIMEBASE
+        while value <= self.MAX_TIMEBASE:
+            # add the value to the list of possible timebase values
+            possible_timebase_values.append(value)
+            # construct the next value:
+            mantissa_idx += 1
+            mantissa_idx %= len(self.TIMEBASE_MANTISSAE)
+            if mantissa_idx == 0: exponent += 1
+            value = '{0}e{1}'.format(self.TIMEBASE_MANTISSAE[mantissa_idx], exponent)
+            value = decimal.Decimal(value)
+            value = float(value)
+        self.possible_timebase_values = possible_timebase_values
+
     @property
     def timebase_scale(self):
         return float(self.query(':TIMebase:MAIN:SCALe?'))
+
+    @timebase_scale.setter
+    def timebase_scale(self, new_timebase):
+        new_timebase = min(self.possible_timebase_values, key=lambda x:abs(x-new_timebase))
+        self.write(":TIMebase:MAIN:SCALe {}".format(new_timebase))
 
     @property
     def sample_rate(self):
