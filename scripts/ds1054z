@@ -246,6 +246,7 @@ def main():
             channels = ds.displayed_channels
             for channel in channels:
                 data.append(ds.get_waveform_samples(channel, mode=args.mode))
+            data.insert(0, ds.waveform_time_values_decimal)
             lengths = [len(samples) for samples in data]
             if len(set(lengths)) != 1:
                 logger.error('Different number of samples read for different channels!')
@@ -259,9 +260,10 @@ def main():
             with csv_open(filename) as csv_file:
                 delimiter = ',' if kind == 'csv' else '\t'
                 csv_writer = csv.writer(csv_file, delimiter=delimiter)
-                csv_writer.writerow(channels)
+                csv_writer.writerow(['TIME'] + channels)
                 for vals in zip_longest(*data):
-                    csv_writer.writerow(['{:.3e}'.format(val) for val in vals])
+                    vals = [vals[0]] + ['{:.3e}'.format(val) for val in vals[1:]]
+                    csv_writer.writerow(vals)
         else:
             parser.error('This tool cannot handle the requested --type')
         if not args.verbose: print(filename)
