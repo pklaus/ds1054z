@@ -355,8 +355,15 @@ class DS1054Z(vxi11.Instrument):
     @staticmethod
     def format_si_prefix(number, unit=None, as_unicode=True, number_format='{:.6f}'):
         """
-        Formats the a number with a metric prefix
+        Formats the given number by choosing an appropriate metric prefix
+        and stripping the formatted number of its zero-digits
         giving a nice human readable form.
+
+        If you provide a unit, it will be appended to the resulting string.
+
+        Example:
+        >>> DS1054Z.format_si_prefix(2E-9, unit='s')
+        '2 ns'
         """
         prefixes  = [( 1e9, 'G'), ( 1e6, 'M'), ( 1e3, 'k'), (  1e0, '' )]
         prefixes += [(1e-3, 'm'), (1e-6, 'u'), (1e-9, 'n'), (1e-12, 'p')]
