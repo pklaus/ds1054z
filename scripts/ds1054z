@@ -112,6 +112,9 @@ def main():
              'MAXimum either reads the full memory if the scope is already stopped '
              'or the 1200 displayed samples otherwise.'
              'Defaults to NORMal.')
+    save_data_parser.add_argument('--without-time', action='store_false', dest='with_time',
+        help="If specified, it will save the data without the extra column "
+             "of time values that's being added by default")
     # ds1054z properties
     action_desc = 'Query properties of the DS1054Z instance'
     properties_parser = subparsers.add_parser('properties', description=action_desc, help=action_desc)
@@ -246,7 +249,8 @@ def main():
             channels = ds.displayed_channels
             for channel in channels:
                 data.append(ds.get_waveform_samples(channel, mode=args.mode))
-            data.insert(0, ds.waveform_time_values_decimal)
+            if args.with_time:
+                data.insert(0, ds.waveform_time_values_decimal)
             lengths = [len(samples) for samples in data]
             if len(set(lengths)) != 1:
                 logger.error('Different number of samples read for different channels!')
@@ -260,9 +264,15 @@ def main():
             with csv_open(filename) as csv_file:
                 delimiter = ',' if kind == 'csv' else '\t'
                 csv_writer = csv.writer(csv_file, delimiter=delimiter)
-                csv_writer.writerow(['TIME'] + channels)
+                if args.with_time:
+                    csv_writer.writerow(['TIME'] + channels)
+                else:
+                    csv_writer.writerow(channels)
                 for vals in zip_longest(*data):
-                    vals = [vals[0]] + ['{:.2e}'.format(val) for val in vals[1:]]
+                    if args.with_time:
+                        vals = [vals[0]] + ['{:.2e}'.format(val) for val in vals[1:]]
+                    else:
+                        vals = ['{:.2e}'.format(val) for val in vals]
                     csv_writer.writerow(vals)
         else:
             parser.error('This tool cannot handle the requested --type')
