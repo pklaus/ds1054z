@@ -8,6 +8,7 @@ import re
 import time
 import sys
 import struct
+import decimal
 
 import vxi11
 
@@ -327,6 +328,29 @@ class DS1054Z(vxi11.Instrument):
         for i in range(self.curr_waveform_memory_depth):
             tv.append(wp['xinc'] * i + wp['xorig'])
         return tv
+
+    @property
+    def waveform_time_values_decimal(self):
+        """
+        This is a wrapper for :py:attr:`waveform_time_values`.
+        It returns the time samples as :py:obj:`Decimal` values instead
+        of float which can be convenient for writing with an appropriate
+        precision to a human readable file format.
+
+        Access this property only after fetching your waveform data,
+        otherwise the values will not be correct.
+
+        Will be fetched every time you access this property.
+
+        :return: sample timestamps (in seconds)
+        :rtype: list of :py:obj:`Decimal`
+        """
+        wp = self.waveform_preamble_dict
+        xinc_fmt = list('{0:.6e}'.format(wp['xinc']).partition('e'))
+        xinc_fmt[0] = xinc_fmt[0].rstrip('0')
+        xinc_fmt = ''.join(xinc_fmt)
+        xinc_dec = decimal.Decimal(xinc_fmt)
+        return [decimal.Decimal(t).quantize(xinc_dec) for t in self.waveform_time_values]
 
     @staticmethod
     def format_si_prefix(number, unit=None, as_unicode=True, number_format='{:.6f}'):
