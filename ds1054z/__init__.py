@@ -331,6 +331,19 @@ class DS1054Z(vxi11.Instrument):
 
     @property
     def timebase_scale(self):
+        """
+        The timebase scale of the scope in seconds.
+
+        The possible values according to the programming guide:
+        - Normal mode:  5 ns  to  50 s  in 1-2-5 steps
+        - Roll mode:  200 ms  to  50 s  in 1-2-5 steps
+
+        You can change the timebase like this:
+
+        >>> scope.timebase_scale = 200E-9
+
+        The nearest possible value will be set.
+        """
         return float(self.query(':TIMebase:MAIN:SCALe?'))
 
     @timebase_scale.setter
