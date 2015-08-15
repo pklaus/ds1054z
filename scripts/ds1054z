@@ -262,7 +262,7 @@ def main():
                 csv_writer = csv.writer(csv_file, delimiter=delimiter)
                 csv_writer.writerow(['TIME'] + channels)
                 for vals in zip_longest(*data):
-                    vals = [vals[0]] + ['{:.3e}'.format(val) for val in vals[1:]]
+                    vals = [vals[0]] + ['{:.2e}'.format(val) for val in vals[1:]]
                     csv_writer.writerow(vals)
         else:
             parser.error('This tool cannot handle the requested --type')
