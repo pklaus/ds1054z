@@ -66,9 +66,9 @@ class DS1054Z(vxi11.Instrument):
     def read_raw(self, *args, **kwargs):
         self.log_timing('starting read')
         data = super(DS1054Z, self).read_raw(*args, **kwargs)
-        self.log_timing('finished reading {} bytes'.format(len(data)))
+        self.log_timing('finished reading {0} bytes'.format(len(data)))
         if len(data) > 200:
-            logger.debug('received a long answer: {} ... {}'.format(format_hex(data[0:10]), format_hex(data[-10:])))
+            logger.debug('received a long answer: {0} ... {1}'.format(format_hex(data[0:10]), format_hex(data[-10:])))
         else:
             logger.debug('received: ' + repr(data))
         return data
@@ -253,14 +253,14 @@ class DS1054Z(vxi11.Instrument):
             We will not get back the expected 1200 samples in this case.
             Thus, a fix is needed to determine at which side the samples are missing.
             """
-            self.write(":WAVeform:STARt {}".format(self.SAMPLES_ON_DISPLAY))
+            self.write(":WAVeform:STARt {0}".format(self.SAMPLES_ON_DISPLAY))
             self.write(":WAVeform:STARt 1")
             if int(self.query(":WAVeform:STARt?")) != 1:
                 starting_at = self.SAMPLES_ON_DISPLAY - pnts + 1
             else:
                 stopping_at = pnts
-        self.write(":WAVeform:STARt {}".format(starting_at))
-        self.write(":WAVeform:STOP {}".format(stopping_at))
+        self.write(":WAVeform:STARt {0}".format(starting_at))
+        self.write(":WAVeform:STOP {0}".format(stopping_at))
         tmp_buff = self.query_raw(":WAVeform:DATA?")
         buff = DS1054Z.decode_ieee_block(tmp_buff)
         assert len(buff) == pnts
@@ -297,9 +297,9 @@ class DS1054Z(vxi11.Instrument):
         max_byte_len = 250000
         pos = 1
         while len(buff) < pnts:
-            self.write(":WAVeform:STARt {}".format(pos))
+            self.write(":WAVeform:STARt {0}".format(pos))
             end_pos = min(pnts, pos+max_byte_len-1)
-            self.write(":WAVeform:STOP {}".format(end_pos))
+            self.write(":WAVeform:STOP {0}".format(end_pos))
             tmp_buff = self.query_raw(":WAVeform:DATA?")
             buff += DS1054Z.decode_ieee_block(tmp_buff)
             pos += max_byte_len
@@ -349,7 +349,7 @@ class DS1054Z(vxi11.Instrument):
     @timebase_scale.setter
     def timebase_scale(self, new_timebase):
         new_timebase = min(self.possible_timebase_values, key=lambda x:abs(x-new_timebase))
-        self.write(":TIMebase:MAIN:SCALe {}".format(new_timebase))
+        self.write(":TIMebase:MAIN:SCALe {0}".format(new_timebase))
 
     @property
     def sample_rate(self):
@@ -399,7 +399,7 @@ class DS1054Z(vxi11.Instrument):
         return [decimal.Decimal(t).quantize(xinc_dec) for t in self.waveform_time_values]
 
     @staticmethod
-    def format_si_prefix(number, unit=None, as_unicode=True, number_format='{:.6f}'):
+    def format_si_prefix(number, unit=None, as_unicode=True, number_format='{0:.6f}'):
         """
         Formats the given number by choosing an appropriate metric prefix
         and stripping the formatted number of its zero-digits
@@ -421,7 +421,7 @@ class DS1054Z(vxi11.Instrument):
             formatted_number = [number_format.format(number / prefix[0]), prefix[1]]
             break
         if not formatted_number:
-            formatted_number = ['{}'.format(number / prefixes[-1][0]), prefixes[-1][1]]
+            formatted_number = ['{0}'.format(number / prefixes[-1][0]), prefixes[-1][1]]
         formatted_number[0] = formatted_number[0].rstrip('0').rstrip('.')
         formatted_number = ' '.join(formatted_number)
         if as_unicode:
@@ -534,7 +534,7 @@ class DS1054Z(vxi11.Instrument):
         self.write(":DISPlay:DATA?")
         logger.info("Receiving screen capture...")
         buff = self.read_raw(self.DISPLAY_DATA_BYTES)
-        logger.info("read {} bytes in .display_data".format(len(buff)))
+        logger.info("read {0} bytes in .display_data".format(len(buff)))
         if len(buff) != self.DISPLAY_DATA_BYTES:
             raise NameError("display_data: didn't receive the right number of bytes")
         return DS1054Z.decode_ieee_block(buff)
