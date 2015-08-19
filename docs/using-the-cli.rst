@@ -32,6 +32,17 @@ The signature of the command line tool is as follows::
       -h, --help     show this help message and exit
       -v, --verbose  More verbose output
 
+Global Options
+--------------
+
+You can increase the verbosity of the tool
+by stating ``--verbose`` before the action argument
+
+If you want to know what's going on behind the scenes,
+and for tracing errors in this software, you might also enable
+the debugging output by using the undocumented ``--debug``
+parameter. Also put it in front of your action argument.
+
 Saving Screenshots
 ------------------
 
