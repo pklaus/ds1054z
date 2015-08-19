@@ -61,10 +61,11 @@ Note that no oscilloscope IP address was specified in the last command.
 This works because the tool performs discovery of DS1000Z devices
 on the local network. If it finds a single one, it picks that as your device.
 
-If you have multiple oscilloscopes in your network, or discovery
-doesn't work for you (please `file a bug report`_ in that case),
-then you can just as well specify its IP address or hostname as an
-positional parameter::
+If you have multiple oscilloscopes in your network, or want the cli tool
+to perform your action faster (discovery takes about 1 second upfront),
+or discovery doesn't work for you (please `file a bug report`_ in that case),
+then you can just as well specify the scope by its IP address or hostname
+as a positional parameter to most of the actions::
 
     ds1054z save-screen --overlay 0.6 192.168.0.23
 
