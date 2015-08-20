@@ -34,9 +34,11 @@ class DS1054Z(vxi11.Instrument):
     H_GRID = 12
     SAMPLES_ON_DISPLAY = 1200
     DISPLAY_DATA_BYTES = 1152068
-    MIN_TIMEBASE = 5E-9
-    MAX_TIMEBASE = 50E0
-    TIMEBASE_MANTISSAE = (1, 2, 5)
+    SCALE_MANTISSAE = (1, 2, 5)
+    MIN_TIMEBASE_SCALE = 5E-9
+    MAX_TIMEBASE_SCALE = 50E0
+    MIN_CHANNEL_SCALE = 1E-3
+    MAX_CHANNEL_SCALE = 1E1
 
     def __init__(self, host, *args, **kwargs):
         self.start = clock()
@@ -49,7 +51,8 @@ class DS1054Z(vxi11.Instrument):
         self.serial = idn[2]
         self.firmware = idn[3]
         self.mask_begin_num = None
-        self._populate_possible_timebase_values()
+        self._populate_possible_timebase_scale_values()
+        self._populate_possible_channel_scale_values()
 
     def clock(self):
         return clock() - self.start
@@ -305,29 +308,80 @@ class DS1054Z(vxi11.Instrument):
             pos += max_byte_len
         return buff
 
-    def _populate_possible_timebase_values(self):
+    def _populate_possible_timebase_scale_values(self):
         """
-        Populates the list of possible timebase values.
+        Populates the list of possible timebase scale values.
 
-        Uses the MIN_TIMEBASE, MAX_TIMEBASE, and TIMEBASE_MANTISSAE
+        Uses the MIN_TIMEBASE_SCALE, MAX_TIMEBASE_SCALE, and SCALE_MANTISSAE
         attributes to do so.
         """
-        possible_timebase_values = []
-        # initialize with the decimal mantissa and exponent for self.MIN_TIMEBASE
-        mantissa_idx = self.TIMEBASE_MANTISSAE.index(int(str(self.MIN_TIMEBASE)[0]))
-        exponent = int('{0:e}'.format(self.MIN_TIMEBASE).split('e')[1])
-        value = self.MIN_TIMEBASE
-        while value <= self.MAX_TIMEBASE:
-            # add the value to the list of possible timebase values
-            possible_timebase_values.append(value)
+        possible_timebase_scale_values = []
+        # initialize with the decimal mantissa and exponent for self.MIN_TIMEBASE_SCALE
+        mantissa_idx = self.SCALE_MANTISSAE.index(int('{0:e}'.format(self.MIN_TIMEBASE_SCALE)[0]))
+        exponent = int('{0:e}'.format(self.MIN_TIMEBASE_SCALE).split('e')[1])
+        value = self.MIN_TIMEBASE_SCALE
+        while value <= self.MAX_TIMEBASE_SCALE:
+            # add the value to the list of possible timebase scale values
+            possible_timebase_scale_values.append(value)
             # construct the next value:
             mantissa_idx += 1
-            mantissa_idx %= len(self.TIMEBASE_MANTISSAE)
+            mantissa_idx %= len(self.SCALE_MANTISSAE)
             if mantissa_idx == 0: exponent += 1
-            value = '{0}e{1}'.format(self.TIMEBASE_MANTISSAE[mantissa_idx], exponent)
+            value = '{0}e{1}'.format(self.SCALE_MANTISSAE[mantissa_idx], exponent)
             value = decimal.Decimal(value)
             value = float(value)
-        self.possible_timebase_values = possible_timebase_values
+        self.possible_timebase_scale_values = possible_timebase_scale_values
+
+    def _populate_possible_channel_scale_values(self):
+        """
+        Populates the list of possible channel scale values.
+
+        Uses the MIN_CHANNEL_SCALE, MAX_CHANNEL_SCALE, and SCALE_MANTISSAE
+        attributes to do so.
+        """
+        possible_channel_scale_values = []
+        # initialize with the decimal mantissa and exponent for self.MIN_CHANNEL_SCALE
+        mantissa_idx = self.SCALE_MANTISSAE.index(int('{0:e}'.format(self.MIN_CHANNEL_SCALE)[0]))
+        exponent = int('{0:e}'.format(self.MIN_CHANNEL_SCALE).split('e')[1])
+        value = self.MIN_CHANNEL_SCALE
+        while value <= self.MAX_CHANNEL_SCALE:
+            # add the value to the list of possible channel scale values
+            possible_channel_scale_values.append(value)
+            # construct the next value:
+            mantissa_idx += 1
+            mantissa_idx %= len(self.SCALE_MANTISSAE)
+            if mantissa_idx == 0: exponent += 1
+            value = '{0}e{1}'.format(self.SCALE_MANTISSAE[mantissa_idx], exponent)
+            value = decimal.Decimal(value)
+            value = float(value)
+        self.possible_channel_scale_values = possible_channel_scale_values
+
+    @property
+    def timebase_offset(self):
+        """
+        The timebase offset of the scope in seconds.
+
+        The possible values according to the programming guide:
+
+        Related to the current vertical scale and probe ratio.
+
+        When the probe ratio is 1X:
+        * -100V to +100V (vertical scale ≥500mV/div)
+        * -2V to +2V (vertical scale<500mV/div)
+
+        When the probe ratio is 10X:
+        * -1000V to +1000V (vertical scale ≥5V/div)
+        * -20V to +20V (vertical scale <5V/div)
+
+        You can change the timebase offset like this:
+
+        >>> scope.timebase_offset = 2.35
+        """
+        return float(self.query(':TIMebase:MAIN:OFFSet?'))
+
+    @timebase_offset.setter
+    def timebase_offset(self, new_offset):
+        self.write(":TIMebase:MAIN:OFFSet {0}".format(new_offset))
 
     @property
     def timebase_scale(self):
@@ -551,6 +605,59 @@ class DS1054Z(vxi11.Instrument):
                 channel_list.append(channel)
         return channel_list
 
+    def get_probe_ratio(self, channel):
+        """
+        Returns the probe ratio for a specific channel
+        """
+        channel = self._interpret_channel(channel)
+        return float(self.query(':{0}:PROBe?'.format(channel)))
+
+    def set_probe_ratio(self, channel, ratio):
+        """
+        Set the probe ratio of a specific channel.
+        """
+        channel = self._interpret_channel(channel)
+        self.write(":{0}:PROBe {1}".format(channel, ratio))
+
+
+    def get_channel_offset(self, channel):
+        """
+        Returns the channel offset in volts.
+        """
+        channel = self._interpret_channel(channel)
+        return float(self.query(':{0}:OFFSet?'.format(channel)))
+
+    def set_channel_offset(self, channel, volts):
+        """
+        Set the (vertical) offset of a specific channel in Volt.
+        """
+        channel = self._interpret_channel(channel)
+        self.write(":{0}:OFFSet {1}".format(channel, volts))
+
+    def get_channel_scale(self, channel):
+        """
+        Returns the channel scale in volts.
+        """
+        channel = self._interpret_channel(channel)
+        return float(self.query(':{0}:SCALe?'.format(channel)))
+
+    def set_channel_scale(self, channel, volts, use_closest_match=False):
+        """
+        The possible values according to the programming guide:
+        1mV, 2mV, 5mV, 10mV...10V
+        for a 1X probe,
+        10mV, 20mV, 50mV, 100mV...100V
+        for a 10X probe.
+
+        If you set keyword argument use_closest_match to True,
+        The closest fit from the list of default values will be chosen).
+        """
+        channel = self._interpret_channel(channel)
+        if use_closest_match:
+            probe_ratio = self.get_probe_ratio(channel)
+            possible_channel_scale_values = [val * probe_ratio for val in self.possible_channel_scale_values]
+            volts = min(possible_channel_scale_values, key=lambda x:abs(x-volts))
+        self.write(":{0}:SCALe {1}".format(channel, volts))
 
 def format_hex(byte_str):
     if sys.version_info >= (3, 0):
