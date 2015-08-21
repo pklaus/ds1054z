@@ -649,8 +649,8 @@ class DS1054Z(vxi11.Instrument):
         10mV, 20mV, 50mV, 100mV...100V
         for a 10X probe.
 
-        If you set keyword argument use_closest_match to True,
-        The closest fit from the list of default values will be chosen).
+        If you set ``use_closest_match=True``, the closest matching
+        entry in the list of default values will be chosen.
         """
         channel = self._interpret_channel(channel)
         if use_closest_match:
