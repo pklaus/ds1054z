@@ -425,7 +425,7 @@ class DS1054Z(vxi11.Instrument):
         """
         wp = self.waveform_preamble_dict
         tv = []
-        for i in range(self.curr_waveform_memory_depth):
+        for i in range(self.memory_depth_curr_waveform):
             tv.append(wp['xinc'] * i + wp['xorig'])
         return tv
 
@@ -530,7 +530,7 @@ class DS1054Z(vxi11.Instrument):
         self.write('WAVeform:MODE ' + mode)
 
     @property
-    def curr_waveform_memory_depth(self):
+    def memory_depth_curr_waveform(self):
         """
         The current memory depth of the oscilloscope.
         This value is the number of samples to expect when reading the
@@ -543,10 +543,10 @@ class DS1054Z(vxi11.Instrument):
         if self.query(':WAVeform:MODE?').startswith('NORM') or self.running:
             return self.SAMPLES_ON_DISPLAY
         else:
-            return self.internal_memory_depth_total
+            return self.memory_depth_internal_total
 
     @property
-    def internal_memory_depth_currently_shown(self):
+    def memory_depth_internal_currently_shown(self):
         """
         The number of samples in the **raw (=deep) memory** of the oscilloscope
         which are **currently being displayed on the screen**.
@@ -561,7 +561,7 @@ class DS1054Z(vxi11.Instrument):
         return int(float(mdep))
 
     @property
-    def internal_memory_depth_total(self):
+    def memory_depth_internal_total(self):
         """
         The total number of samples in the **raw (=deep) memory** of the oscilloscope.
 
@@ -571,7 +571,7 @@ class DS1054Z(vxi11.Instrument):
         if mdep == "AUTO":
             curr_mode = self.query(':WAVeform:MODE?')
             if not curr_mode.startswith('RAW'):
-                """in this case we need to switch to RAW mode to find out the memory_depth"""
+                """in this case we need to switch to RAW mode to find out the memory depth"""
                 self.write(':WAVeform:MODE RAW')
                 mdep = self.waveform_preamble_dict['pnts']
                 self.write(':WAVeform:MODE ' + curr_mode)
