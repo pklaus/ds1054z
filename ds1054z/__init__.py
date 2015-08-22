@@ -536,7 +536,7 @@ class DS1054Z(vxi11.Instrument):
         This value is the number of samples to expect when reading the
         waveform data and depends on the status of the scope (running / stopped).
 
-        Needed by :py:meth:`waveform_time_values`.
+        Needed by :py:attr:`waveform_time_values`.
 
         This property will be updated every time you access it.
         """
