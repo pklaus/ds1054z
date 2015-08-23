@@ -367,11 +367,11 @@ class DS1054Z(vxi11.Instrument):
 
         Related to the current vertical scale and probe ratio.
 
-        When the probe ratio is 1X:
+        When the probe ratio is 1x:
         * -100V to +100V (vertical scale ≥500mV/div)
         * -2V to +2V (vertical scale<500mV/div)
 
-        When the probe ratio is 10X:
+        When the probe ratio is 10x:
         * -1000V to +1000V (vertical scale ≥5V/div)
         * -20V to +20V (vertical scale <5V/div)
 
@@ -647,9 +647,9 @@ class DS1054Z(vxi11.Instrument):
         """
         The possible values according to the programming guide:
         1mV, 2mV, 5mV, 10mV...10V
-        for a 1X probe,
+        for a 1x probe,
         10mV, 20mV, 50mV, 100mV...100V
-        for a 10X probe.
+        for a 10x probe.
 
         If you set ``use_closest_match=True``, the closest matching
         entry in the list of default values will be chosen.
