@@ -330,6 +330,7 @@ class DS1054Z(vxi11.Instrument):
             value = '{0}e{1}'.format(self.SCALE_MANTISSAE[mantissa_idx], exponent)
             value = decimal.Decimal(value)
             value = float(value)
+        #: The list of possible timebase scale values in seconds/div
         self.possible_timebase_scale_values = possible_timebase_scale_values
 
     def _populate_possible_channel_scale_values(self):
@@ -354,6 +355,7 @@ class DS1054Z(vxi11.Instrument):
             value = '{0}e{1}'.format(self.SCALE_MANTISSAE[mantissa_idx], exponent)
             value = decimal.Decimal(value)
             value = float(value)
+        #: The list of possible channel scale values in volts/div (for a probe ratio of 1x)
         self.possible_channel_scale_values = possible_channel_scale_values
 
     @property
