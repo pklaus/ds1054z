@@ -9,7 +9,7 @@ Off course, you can also use it to control the scope with your own script by usi
 this package has to offer.
 
 While this software is named after the entry level oscilloscope DS1054Z,
-there is no reason to believe it wouldn't also work with just any scope
+I believe there is no reason it wouldn't work with just any scope
 of the DS1000Z and MSO1000Z series by Rigol:
 
 * DS1054Z
