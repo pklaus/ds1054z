@@ -24,6 +24,12 @@ try:
 except AttributeError:
     clock = time.time
 
+class DS1000ZServiceInfo(ServiceInfo):
+    """ Patched version of zeroconf.ServiceInfo for DS1000Z devices."""
+    @property
+    def properties(self):
+        properties = {k: v for k, v in self._properties.items() if v is not None}
+        return properties
 
 class Listener(object):
     def __init__(self, filter_func=None):
@@ -36,7 +42,7 @@ class Listener(object):
 
     def add_service(self, zeroconf, zc_type, zc_name):
         zc_info = zeroconf.get_service_info(zc_type, zc_name)
-        zc_info._properties = {k: v for k, v in zc_info.properties.items() if v is not None}
+        zc_info.__class__ = DS1000ZServiceInfo
 
         result = {
           'zc_name' : zc_name,
