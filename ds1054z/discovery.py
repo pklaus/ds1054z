@@ -14,7 +14,7 @@ raises an ImportError in case, the zeroconf package is not installed.
 
 # Derived from https://gist.github.com/pklaus/0a799921217bc9a7d86f
 
-from zeroconf import *
+from zeroconf import ServiceInfo, Zeroconf, ServiceBrowser
 import socket
 import time
 import re
@@ -36,12 +36,12 @@ class Listener(object):
         self.results = []
         self.filter_func = filter_func
 
-    def remove_service(self, zeroconf, zc_type, zc_name):
+    def remove_service(self, zc, zc_type, zc_name):
         #print('Service "{0}" removed'.format(zc_name))
         pass
 
-    def add_service(self, zeroconf, zc_type, zc_name):
-        zc_info = zeroconf.get_service_info(zc_type, zc_name)
+    def add_service(self, zc, zc_type, zc_name):
+        zc_info = zc.get_service_info(zc_type, zc_name)
         zc_info.__class__ = DS1000ZServiceInfo
 
         result = {
