@@ -32,9 +32,10 @@ class DS1000ZServiceInfo(ServiceInfo):
         return properties
 
 class Listener(object):
-    def __init__(self, filter_func=None):
+    def __init__(self, filter_func=None, cast_service_info=None):
         self.results = []
         self.filter_func = filter_func
+        self.cast_service_info = cast_service_info
 
     def remove_service(self, zc, zc_type, zc_name):
         #print('Service "{0}" removed'.format(zc_name))
@@ -42,7 +43,8 @@ class Listener(object):
 
     def add_service(self, zc, zc_type, zc_name):
         zc_info = zc.get_service_info(zc_type, zc_name)
-        zc_info.__class__ = DS1000ZServiceInfo
+        if self.cast_service_info:
+            zc_info.__class__ = self.cast_service_info
 
         result = {
           'zc_name' : zc_name,
@@ -77,7 +79,7 @@ def _get_ds1000z_results(if_any_return_after=0.8, timeout=2.5):
             return False
         return True
 
-    listener = Listener(filter_func=ds1000z_filter)
+    listener = Listener(filter_func=ds1000z_filter, cast_service_info=DS1000ZServiceInfo)
     browser = ServiceBrowser(zc, '_scpi-raw._tcp.local.', listener=listener)
 
     start = clock()
