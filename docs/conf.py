@@ -23,7 +23,7 @@ exclude_patterns = ['_build']
 add_module_names = True
 pygments_style = 'sphinx'
 #keep_warnings = True
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
 if not on_rtd:
     # https://docs.readthedocs.org/en/latest/theme.html
     import sphinx_rtd_theme
