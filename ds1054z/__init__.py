@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 try:
     clock = time.perf_counter
-except:
+except AttributeError:
     clock = time.time
 
 class DS1054Z(vxi11.Instrument):
