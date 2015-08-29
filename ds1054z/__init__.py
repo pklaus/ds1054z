@@ -663,6 +663,6 @@ class DS1054Z(vxi11.Instrument):
 
 def format_hex(byte_str):
     if sys.version_info >= (3, 0):
-        return ''.join( [ "%02X " % x  for x in byte_str ] ).strip()
+        return ' '.join( [ "{:02X}".format(x)  for x in byte_str ] )
     else:
-        return ''.join( [ "%02X " % ord(x)  for x in byte_str ] ).strip()
+        return ' '.join( [ "{:02X}".format(ord(x))  for x in byte_str ] )
