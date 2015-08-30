@@ -58,7 +58,7 @@ class Listener(object):
             self.results.append(result)
 
 
-def _get_ds1000z_results(if_any_return_after=0.8, timeout=2.5):
+def _get_ds1000z_results(if_any_return_after=1.0, timeout=2.5):
     """
     Zeroconf service discovery of ``_scpi-raw._tcp.local.``
     The results are filtered for entries matching the Rigol DS1000Z scope series.
