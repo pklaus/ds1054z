@@ -97,6 +97,12 @@ class DS1054Z(vxi11.Instrument):
         data = message.encode(self.ENCODING)
         return self.ask_raw(data, *args, **kwargs)
 
+    def _interpret_channel(self, channel):
+        """ wrapper to allow specifying channels by their name (str) or by their number (int) """
+        if type(channel) == int:
+            channel = 'CHAN' + str(channel)
+        return channel
+
     @property
     def running(self):
         return self.query(':TRIGger:STATus?') in ('TD', 'WAIT', 'RUN', 'AUTO')
@@ -222,7 +228,7 @@ class DS1054Z(vxi11.Instrument):
         :return: The waveform data
         :rtype: bytes
         """
-        channel = DS1054Z._interpret_channel(channel)
+        channel = self._interpret_channel(channel)
         if mode.upper().startswith('NORM') or (self.running and mode.upper().startswith('MAX')):
             return self._get_waveform_bytes_screen(channel, mode=mode)
         else:
@@ -233,7 +239,7 @@ class DS1054Z(vxi11.Instrument):
         This function returns the waveform bytes from the scope if you desire
         to read the bytes corresponding to the screen content.
         """
-        channel = DS1054Z._interpret_channel(channel)
+        channel = self._interpret_channel(channel)
         assert mode.upper().startswith('NOR') or mode.upper().startswith('MAX')
         self.write(":WAVeform:SOURce " + channel)
         self.write(":WAVeform:FORMat BYTE")
@@ -281,7 +287,7 @@ class DS1054Z(vxi11.Instrument):
         This function returns the waveform bytes from the scope if you desire
         to read the bytes corresponding to the internal (deep) memory.
         """
-        channel = DS1054Z._interpret_channel(channel)
+        channel = self._interpret_channel(channel)
         assert mode.upper().startswith('MAX') or mode.upper().startswith('RAW')
         if self.running:
             self.stop()
@@ -497,13 +503,6 @@ class DS1054Z(vxi11.Instrument):
         n_data_bytes = int(ieee_bytes[2:n_header_bytes].decode('ascii'))
         return ieee_bytes[n_header_bytes:n_header_bytes + n_data_bytes]
 
-    @staticmethod
-    def _interpret_channel(channel):
-        """ wrapper to allow specifying channels by their name (str) or by their number (int) """
-        if type(channel) == int:
-            channel = 'CHAN' + str(channel)
-        return channel
-
     @property
     def idn(self):
         """
@@ -612,14 +611,14 @@ class DS1054Z(vxi11.Instrument):
         """
         Returns the probe ratio for a specific channel
         """
-        channel = DS1054Z._interpret_channel(channel)
+        channel = self._interpret_channel(channel)
         return float(self.query(':{0}:PROBe?'.format(channel)))
 
     def set_probe_ratio(self, channel, ratio):
         """
         Set the probe ratio of a specific channel.
         """
-        channel = DS1054Z._interpret_channel(channel)
+        channel = self._interpret_channel(channel)
         self.write(":{0}:PROBe {1}".format(channel, ratio))
 
 
@@ -627,21 +626,21 @@ class DS1054Z(vxi11.Instrument):
         """
         Returns the channel offset in volts.
         """
-        channel = DS1054Z._interpret_channel(channel)
+        channel = self._interpret_channel(channel)
         return float(self.query(':{0}:OFFSet?'.format(channel)))
 
     def set_channel_offset(self, channel, volts):
         """
         Set the (vertical) offset of a specific channel in Volt.
         """
-        channel = DS1054Z._interpret_channel(channel)
+        channel = self._interpret_channel(channel)
         self.write(":{0}:OFFSet {1}".format(channel, volts))
 
     def get_channel_scale(self, channel):
         """
         Returns the channel scale in volts.
         """
-        channel = DS1054Z._interpret_channel(channel)
+        channel = self._interpret_channel(channel)
         return float(self.query(':{0}:SCALe?'.format(channel)))
 
     def set_channel_scale(self, channel, volts, use_closest_match=False):
@@ -655,7 +654,7 @@ class DS1054Z(vxi11.Instrument):
         If you set ``use_closest_match=True``, the closest matching
         entry in the list of default values will be chosen.
         """
-        channel = DS1054Z._interpret_channel(channel)
+        channel = self._interpret_channel(channel)
         if use_closest_match:
             probe_ratio = self.get_probe_ratio(channel)
             possible_channel_scale_values = [val * probe_ratio for val in self.possible_channel_scale_values]
