@@ -100,6 +100,8 @@ def main():
         help='The filename template for the image')
     save_screen_parser.add_argument('--overlay', '-o', metavar='RATIO', type=float, default=0.5,
         help='Dim on-screen controls in --save-screen with a mask (default ratio: 0.5)')
+    save_screen_parser.add_argument('--printable', '-p', action='store_true',
+        help='Make the screenshot more printer-friendly')
     # ds1054z save-data
     action_desc = 'Save the waveform data to a file'
     save_data_parser = subparsers.add_parser('save-data', parents=[device_parser],
@@ -217,7 +219,7 @@ def main():
 
     if args.action == 'save-screen':
         try:
-            from PIL import Image
+            from PIL import Image, ImageOps, ImageEnhance
         except ImportError:
             parser.error('Please install Pillow (or the older PIL) to use --save-screen')
         # formatting the filename
@@ -236,6 +238,12 @@ def main():
         overlay = Image.blend(alpha_100_percent, overlay, args.overlay)
         im.putalpha(255)
         im = Image.alpha_composite(im, overlay)
+        if args.printable:
+            im = Image.merge("RGB", im.split()[0:3])
+            im = ImageOps.invert(im)
+            im = ImageEnhance.Color(im).enhance(0)
+            im = ImageEnhance.Brightness(im).enhance(0.95)
+            im = ImageEnhance.Contrast(im).enhance(2)
         im.save(filename, format=ext[1:])
         if not args.verbose: print(filename)
         else: print("Saved file: " + filename)
