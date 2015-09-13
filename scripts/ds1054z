@@ -245,6 +245,7 @@ def main():
             im = ImageEnhance.Brightness(im).enhance(0.95)
             im = ImageEnhance.Contrast(im).enhance(2)
             im = im.convert('L')
+            im = im.point(lambda x: x if x<252 else 255)
         else:
             im = im.convert('RGB')
         im.save(filename, format=ext[1:])
