@@ -7,8 +7,17 @@ except ImportError:
 
 try:
     import pypandoc
-    LDESC = pypandoc.convert('README.md', 'rst')
-except (IOError, ImportError, RuntimeError):
+    # for PyPI: Removing images with relative paths and their descriptions:
+    import re
+    LDESC = open('README.md', 'r').read()
+    matches = re.findall(r'\n\n(.*(\n.+)*:\n\n!\[.*\]\((.*\))(\n\n)?)', LDESC)
+    for match in matches:
+        text, _, link, _ = match
+        if text.startswith('http://'): continue
+        LDESC = LDESC.replace(text, '')
+    # Converting to rst
+    LDESC = pypandoc.convert(LDESC, 'rst', format='md')
+except (ImportError, IOError, RuntimeError):
     LDESC = ''
 
 setup(name='ds1054z',
