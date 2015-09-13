@@ -244,6 +244,9 @@ def main():
             im = ImageEnhance.Color(im).enhance(0)
             im = ImageEnhance.Brightness(im).enhance(0.95)
             im = ImageEnhance.Contrast(im).enhance(2)
+            im = im.convert('L')
+        else:
+            im = im.convert('RGB')
         im.save(filename, format=ext[1:])
         if not args.verbose: print(filename)
         else: print("Saved file: " + filename)
