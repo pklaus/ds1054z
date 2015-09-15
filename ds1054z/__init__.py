@@ -404,7 +404,7 @@ class DS1054Z(vxi11.Instrument):
 
     @timebase_scale.setter
     def timebase_scale(self, new_timebase):
-        new_timebase = min(self.possible_timebase_values, key=lambda x:abs(x-new_timebase))
+        new_timebase = min(self.possible_timebase_scale_values, key=lambda x:abs(x-new_timebase))
         self.write(":TIMebase:MAIN:SCALe {0}".format(new_timebase))
 
     @property
