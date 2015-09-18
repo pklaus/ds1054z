@@ -566,7 +566,7 @@ class DS1054Z(vxi11.Instrument):
     def memory_depth_internal_total(self):
         """
         The total number of samples in the **raw (=deep) memory** of the oscilloscope.
-        The scope will be temporarily stopped if it's running when accessing this value.
+        If it's running, the scope will be stopped temporarily when accessing this value.
 
         This property will be updated every time you access it.
         """
