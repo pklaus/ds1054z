@@ -169,7 +169,10 @@ def main():
             sys.exit(1)
         devices = discover_devices()
         for device in devices:
-            print("Found a {model} with the IP Address {ip}.".format(**device))
+            if args.verbose:
+                print("Found a {model} with the IP Address {ip}.".format(**device))
+            else:
+                print("{ip}".format(**device))
         sys.exit(0)
 
     if not args.device:
