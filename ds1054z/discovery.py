@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 The submodule :py:mod:`ds1054z.discovery` - Zeroconf Discovery for Rigol DS1000Z-series scopes
