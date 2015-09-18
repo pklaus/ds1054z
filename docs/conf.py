@@ -7,6 +7,8 @@ import sys
 import os
 import shlex
 
+sys.path.insert(0, '..')
+
 # General information about the project.
 project = 'ds1054z'
 copyright = '2015, Philipp Klaus'
