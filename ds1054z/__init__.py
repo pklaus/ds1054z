@@ -566,19 +566,25 @@ class DS1054Z(vxi11.Instrument):
     def memory_depth_internal_total(self):
         """
         The total number of samples in the **raw (=deep) memory** of the oscilloscope.
+        The scope will be temporarily stopped if it's running when accessing this value.
 
         This property will be updated every time you access it.
         """
         mdep = self.query(":ACQuire:MDEPth?")
         if mdep == "AUTO":
+            curr_running = self.running
             curr_mode = self.query(':WAVeform:MODE?')
-            if not curr_mode.startswith('RAW'):
-                """in this case we need to switch to RAW mode to find out the memory depth"""
+            if curr_running:
+                self.stop()
+            if curr_mode.startswith('NORM'):
+                # in this case we need to switch to RAW mode to find out the memory depth
                 self.write(':WAVeform:MODE RAW')
                 mdep = self.waveform_preamble_dict['pnts']
                 self.write(':WAVeform:MODE ' + curr_mode)
             else:
                 mdep = self.waveform_preamble_dict['pnts']
+            if curr_running:
+                self.run()
         return int(float(mdep))
 
     @property
