@@ -342,21 +342,13 @@ class DS1054Z(vxi11.Instrument):
         """
         The timebase offset of the scope in seconds.
 
-        The possible values according to the programming guide:
+        You can change the timebase offset by assigning to this property:
 
-        Related to the current vertical scale and probe ratio.
+        >>> scope.timebase_offset = 200e-6
 
-        When the probe ratio is 1x:
-        * -100V to +100V (vertical scale ≥500mV/div)
-        * -2V to +2V (vertical scale<500mV/div)
+        The possible values according to the programming manual:
 
-        When the probe ratio is 10x:
-        * -1000V to +1000V (vertical scale ≥5V/div)
-        * -20V to +20V (vertical scale <5V/div)
-
-        You can change the timebase offset like this:
-
-        >>> scope.timebase_offset = 2.35
+        * -Screen/2 to 1s or -Screen/2 to 5000s.
         """
         return float(self.query(':TIMebase:MAIN:OFFSet?'))
 
@@ -370,8 +362,9 @@ class DS1054Z(vxi11.Instrument):
         The timebase scale of the scope in seconds.
 
         The possible values according to the programming guide:
-        - Normal mode:  5 ns  to  50 s  in 1-2-5 steps
-        - Roll mode:  200 ms  to  50 s  in 1-2-5 steps
+
+        * Normal mode:  5 ns  to  50 s  in 1-2-5 steps
+        * Roll mode:  200 ms  to  50 s  in 1-2-5 steps
 
         You can change the timebase like this:
 
@@ -626,6 +619,22 @@ class DS1054Z(vxi11.Instrument):
     def set_channel_offset(self, channel, volts):
         """
         Set the (vertical) offset of a specific channel in Volt.
+
+        The range of possible offset values depends on the current vertical scale and on
+        the probe ratio. With the probe ratio set to 1x the offset can be set between:
+
+        * -100V and +100V (if vertical scale ≥ 500mV/div), or
+        * -2V and +2V (if vertical scale < 500mV/div).
+
+        The range scales with the probe ratio. Thus, when the probe ratio is set to 10x,
+        for example, the offset could be set between:
+
+        * -1000V and +1000V (if vertical scale ≥ 5V/div), or
+        * -20V and +20V (if vertical scale < 5V/div).
+
+        :param channel: The channel name (like CHAN1, ...). Alternatively specify the channel by its number (as integer).
+        :type channel: int or str
+        :param float volts: the new vertical scale offset in volts
         """
         channel = self._interpret_channel(channel)
         self.write(":{0}:OFFSet {1}".format(channel, volts))
@@ -633,20 +642,27 @@ class DS1054Z(vxi11.Instrument):
     def get_channel_scale(self, channel):
         """
         Returns the channel scale in volts.
+
+        :return: channel scale
+        :rtype: float
         """
         channel = self._interpret_channel(channel)
         return float(self.query(':{0}:SCALe?'.format(channel)))
 
     def set_channel_scale(self, channel, volts, use_closest_match=False):
         """
-        The possible values according to the programming guide:
-        1mV, 2mV, 5mV, 10mV...10V
-        for a 1x probe,
-        10mV, 20mV, 50mV, 100mV...100V
-        for a 10x probe.
+        The default steps according to the programming guide:
 
-        If you set ``use_closest_match=True``, the closest matching
-        entry in the list of default values will be chosen.
+        * 1mV, 2mV, 5mV, 10mV...10V (for a 1x probe),
+        * 10mV, 20mV, 50mV, 100mV...100V (for a 10x probe).
+
+        You can also set the scale to values in between those steps
+        (as with using the fine adjustment mode on the scope).
+
+        :param channel: The channel name (like CHAN1, ...). Alternatively specify the channel by its number (as integer).
+        :type channel: int or str
+        :param float volts: the new value for the vertical channel scaling
+        :param bool use_closest_match: round new scale value to closest match from the default steps
         """
         channel = self._interpret_channel(channel)
         if use_closest_match:
