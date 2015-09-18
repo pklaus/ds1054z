@@ -60,9 +60,10 @@ def main():
         description=textwrap.dedent(__doc__),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         )
-    parser.add_argument('--verbose', action='store_true',
+    parser.add_argument('-v', '--verbose', action='store_true',
         help='More verbose output')
     parser.add_argument('--version', action='store_true',
+        #'Display the version of the tool/package and exit.'
         help=argparse.SUPPRESS)
     parser.add_argument('--debug', action='store_true',
         #help='Enable debugging output',

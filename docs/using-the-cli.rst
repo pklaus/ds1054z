@@ -18,6 +18,7 @@ The signature of the command line tool is as follows::
     positional arguments:
       <action>       Action to perform on the scope:
         discover     Discover and list scopes on your network and exit
+        info         Print information about your oscilloscope
         cmd          Send an SCPI command to the oscilloscope
         save-screen  Save an image of the screen
         save-data    Save the waveform data to a file
