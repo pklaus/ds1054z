@@ -29,7 +29,11 @@ setup(name='ds1054z',
       url = 'https://github.com/pklaus/ds1054z',
       license = 'GPL',
       packages = ['ds1054z'],
-      scripts = ['scripts/ds1054z'],
+      entry_points = {
+          'console_scripts': [
+              'ds1054z = ds1054z.cli:main',
+          ],
+      },
       include_package_data = True,
       zip_safe = True,
       platforms = 'any',
