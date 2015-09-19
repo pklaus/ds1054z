@@ -72,6 +72,8 @@ def main():
         )
 
     device_parser = argparse.ArgumentParser(add_help=False)
+    device_parser.add_argument('--backend', help='The connection backend to use. '
+             'Choose from python_vxi11, tcp_socket, python_usbtmc and linux_kernel.')
     device_parser.add_argument('device', nargs='?',
         help='The device string. Typically the IP address of the oscilloscope. '
              'Will try to discover a single (!) scope on the network if you leave it out.')
@@ -214,7 +216,7 @@ def main():
         else: # len(devices) == 0
             if args.verbose: print("Found a scope: {model} @ {ip}".format(**devices[0]))
             args.device = devices[0]['ip']
-    ds = DS1054Z(args.device)
+    ds = DS1054Z(args.device, args.backend)
 
     if args.action == 'info':
         fmt = "\nVendor:   {0}\nProduct:  {1}\nSerial:   {2}\nFirmware: {3}\n"
