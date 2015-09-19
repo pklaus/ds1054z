@@ -300,14 +300,17 @@ def main():
         else: print("Saved file: " + filename)
 
     if args.action == 'shell':
-        import atexit
-        import readline
-        histfile = os.path.join(os.path.expanduser("~"), ".ds1054z_history")
         try:
-            readline.read_history_file(histfile)
-        except FileNotFoundError:
+            import atexit
+            import readline
+            histfile = os.path.join(os.path.expanduser("~"), ".ds1054z_history")
+            try:
+                readline.read_history_file(histfile)
+            except FileNotFoundError:
+                pass
+            atexit.register(readline.write_history_file, histfile)
+        except ImportError:
             pass
-        atexit.register(readline.write_history_file, histfile)
         run_shell(ds)
 
 def run_shell(ds):
