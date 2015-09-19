@@ -11,8 +11,10 @@ import time
 import sys
 import struct
 import decimal
+import functools
 
-import vxi11
+from universal_usbtmc import import_backend
+from universal_usbtmc.exceptions import *
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +23,7 @@ try:
 except AttributeError:
     clock = time.time
 
-class DS1054Z(vxi11.Instrument):
+class DS1054Z(object):
     """
     This class represents the oscilloscope.
 
@@ -45,9 +47,24 @@ class DS1054Z(vxi11.Instrument):
     MAX_PROBE_RATIO = 1000
     CHANNEL_LIST = ("CHAN1", "CHAN2", "CHAN3", "CHAN4", "MATH")
 
-    def __init__(self, host, *args, **kwargs):
+    def __init__(self, device, backend='python_vxi11'):
+
+        self.possible_probe_ratio_values = self._populate_possible_values('PROBE_RATIO')
+        self.possible_timebase_scale_values = self._populate_possible_values('TIMEBASE_SCALE')
+        self.possible_channel_scale_values = self._populate_possible_values('CHANNEL_SCALE')
+
+        for method in ('write', 'write_raw', 'read', 'read_raw', 'query', 'query_raw'):
+            setattr(self, method, functools.partial(self.call_dev, method))
+
         self.start = clock()
-        super(DS1054Z, self).__init__(host, *args, **kwargs)
+        try:
+            backend = import_backend(backend)
+        except UsbtmcNoSuchBackend:
+            raise ('Unknown backend {}.'.format(args.backend))
+        except UsbtmcMissingDependency as md:
+            raise ('The backend could not be loaded, ' + str(md))
+        self.dev = backend.Instrument(device)
+
         idn = self.idn
         match = re.match(self.IDN_PATTERN, idn)
         if not match:
@@ -69,48 +86,14 @@ class DS1054Z(vxi11.Instrument):
                                               6000,  60000,  600000,  6000000, 12000000,
                                               3000,  30000,  300000,  3000000,  6000000)
 
+    def call_dev(self, method, *args, **kwargs):
+        return getattr(self.dev, method)(*args, **kwargs)
+
     def clock(self):
         return clock() - self.start
 
     def log_timing(self, msg):
         logger.info('{0:.3f} - {1}'.format(self.clock(), msg))
-
-    def write_raw(self, cmd, *args, **kwargs):
-        self.log_timing('starting write')
-        logger.debug('sending: ' + repr(cmd))
-        super(DS1054Z, self).write_raw(cmd, *args, **kwargs)
-        self.log_timing('finishing write')
-
-    def read_raw(self, *args, **kwargs):
-        self.log_timing('starting read')
-        data = super(DS1054Z, self).read_raw(*args, **kwargs)
-        self.log_timing('finished reading {0} bytes'.format(len(data)))
-        if len(data) > 200:
-            logger.debug('received a long answer: {0} ... {1}'.format(format_hex(data[0:10]), format_hex(data[-10:])))
-        else:
-            logger.debug('received: ' + repr(data))
-        return data
-
-    def query(self, message, *args, **kwargs):
-        """
-        Write a message to the scope and read back the answer.
-        See :py:meth:`vxi11.Instrument.ask()` for optional parameters.
-        """
-        return self.ask(message, *args, **kwargs)
-
-    def query_raw(self, message, *args, **kwargs):
-        """
-        Write a message to the scope and read a (binary) answer.
-
-        This is the slightly modified version of :py:meth:`vxi11.Instrument.ask_raw()`.
-        It takes a command message string and returns the answer as bytes.
-
-        :param str message: The SCPI command to send to the scope.
-        :return: Data read from the device
-        :rtype: bytes
-        """
-        data = message.encode(self.ENCODING)
-        return self.ask_raw(data, *args, **kwargs)
 
     def _interpret_channel(self, channel):
         """ wrapper to allow specifying channels by their name (str) or by their number (int) """
