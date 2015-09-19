@@ -39,7 +39,7 @@ setup(name='ds1054z',
       include_package_data = True,
       zip_safe = True,
       platforms = 'any',
-      install_requires = ['python_vxi11'],
+      install_requires = ['universal_usbtmc'],
       extras_require = {
           'savescreen':  ["Pillow",],
           'discovery':   ["zeroconf",],
