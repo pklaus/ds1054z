@@ -3,7 +3,7 @@
 # ds1054z
 
 This package allows you to connect to your Rigol DS1054Z
-oscilloscope via Ethernet. It comes with a versatile command line tool.
+oscilloscope via Ethernet or USB. It comes with a versatile command line tool.
 
 Off course, you can also use it to control the scope with your own script by using
 [the API](https://ds1054z.readthedocs.org/en/stable/api/index.html)
@@ -37,7 +37,7 @@ The installation is dead simple:
 
     pip install ds1054z[savescreen,discovery]
 
-ds1054z depends on [python-vxi11](https://github.com/python-ivi/python-vxi11)
+ds1054z depends on [universal_usbtmc](https://github.com/pklaus/universal_usbtmc)
 which should automatically get installed along with itself.
 
 
