@@ -122,6 +122,14 @@ def main():
     save_data_parser.add_argument('--without-time', action='store_false', dest='with_time',
         help="If specified, it will save the data without the extra column "
              "of time values that's being added by default")
+    # ds1054z settings
+    action_desc = 'View and change settings of the oscilloscope'
+    settings_parser = subparsers.add_parser('settings', parents=[device_parser],
+        description=action_desc, help=action_desc)
+    settings_parser.add_argument('--timebase', type=float,
+        help="Change the timebase of the oscilloscope to this value (in seconds/div).")
+    settings_parser.add_argument('--timebase-offset', type=float,
+        help="Change the timebase offset of the oscilloscope to this value (in seconds).")
     # ds1054z properties
     action_desc = 'Query properties of the DS1054Z instance'
     properties_parser = subparsers.add_parser('properties', description=action_desc, help=action_desc)
@@ -210,6 +218,35 @@ def main():
 
     if args.action in ('run', 'stop', 'single', 'tforce'):
         getattr(ds, args.action)()
+
+    if args.action == 'settings':
+        if args.timebase:
+            ds.timebase_scale = args.timebase
+        if args.timebase_offset:
+            ds.timebase_offset = args.timebase_offset
+        wp = ds.waveform_preamble_dict
+        if args.verbose:
+            displayed_channels = ds.displayed_channels
+            print("Sample Rate: {0}Sa/s".format(DS1054Z.format_si_prefix(ds.sample_rate)))
+            print("Timebase: {0}s/div".format(DS1054Z.format_si_prefix(ds.timebase_scale)))
+            print("Timebase Offset: {0}s".format(DS1054Z.format_si_prefix(ds.timebase_offset)))
+            ds.set_waveform_mode('NORMal')
+            tv = ds.waveform_time_values
+            t_from = DS1054Z.format_si_prefix(tv[0],  unit='s')
+            t_to =   DS1054Z.format_si_prefix(tv[-1], unit='s')
+            print("The time axis goes from {0} to {1}".format(t_from, t_to))
+            print("Displayed Channels: {0}".format(' '.join(displayed_channels)))
+            for channel in displayed_channels:
+                print("  Channel {0}:".format(channel))
+                print("    Scale: {0}V/div".format(DS1054Z.format_si_prefix(ds.get_channel_scale(channel))))
+                print("    Offset: {0}V".format(ds.get_channel_offset(channel)))
+                print("    Probe Ratio: {}".format(ds.get_probe_ratio(channel)))
+                print("    ---".format(DS1054Z.format_si_prefix(ds.get_channel_scale(channel))))
+        else:
+            print('sample_rate={}'.format(ds.sample_rate))
+            print('timebase_scale={}'.format(ds.timebase_scale))
+            print('timebase_offset={}'.format(ds.timebase_offset))
+            print('displayed_channels={}'.format(','.join(ds.displayed_channels)))
 
     if args.action == 'properties':
         for prop in args.properties:
