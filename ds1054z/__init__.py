@@ -673,6 +673,21 @@ class DS1054Z(vxi11.Instrument):
             volts = min(possible_channel_scale_values, key=lambda x:abs(x-volts))
         self.write(":{0}:SCALe {1}".format(channel, volts))
 
+    def get_channel_measurement(self, channel, item, type="CURRent"):
+        """
+        Measures value on a channel
+
+        :param channel: The channel name (like CHAN1, ...). Alternatively specify the channel by its number (as integer).
+        :type channel: int or str
+        :param str item: Item to measure, can be vmax, vmin, vpp, vtop, vbase, vamp, vavg, vrms, overshoot, preshoot, marea, mparea, period, frequency, rtime, ftime, pwidth, nwidth, pduty, nduty, rdelay, fdelay, rphase, fphase, tvmax, tvmin, pslewrate, nslewrate, vupper, vmid, vlower, variance, pvrms
+        :param str type: Type of measurement, can be CURRent, MAXimum, MINimum, AVERages, DEViation
+        """
+        channel = self._interpret_channel(channel)
+        ret = float(self.query(":MEASure:STATistic:item? {0},{1},{2}".format(type, item, channel)))
+        if ret == 9.9e37: # This is a value which means that the measurement cannot be taken for some reason (channel disconnected/no edge in the trace etc.)
+            return None
+        return ret
+
 def format_hex(byte_str):
     if sys.version_info >= (3, 0):
         return ' '.join( [ "{:02X}".format(x)  for x in byte_str ] )
