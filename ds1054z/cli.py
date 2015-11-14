@@ -18,6 +18,7 @@ import pkg_resources
 import sys
 import os
 import itertools
+import errno
 
 from ds1054z import DS1054Z
 
@@ -157,6 +158,15 @@ def main():
     action_desc = 'Start an interactive shell to control your scope.'
     tforce_parser = subparsers.add_parser('shell', parents=[device_parser],
         description=action_desc, help=action_desc)
+    # ds1054z measure
+    action_desc = 'Measure a value on a channel'
+    measure_parser = subparsers.add_parser('measure', parents=[device_parser],
+        description=action_desc, help=action_desc)
+    measure_parser.add_argument('--channel', '-c', choices=(1, 2, 3, 4), type=int, required=True,
+        help='Channel from which to take the measurement')
+    measure_parser.add_argument('--type', '-t', choices=('CURRent', 'MAXimum', 'MINimum', 'AVERages', 'DEViation'), default='CURRent')
+    measure_parser.add_argument('item', choices=('vmax', 'vmin', 'vpp', 'vtop', 'vbase', 'vamp', 'vavg', 'vrms', 'overshoot', 'preshoot', 'marea', 'mparea', 'period', 'frequency', 'rtime', 'ftime', 'pwidth', 'nwidth', 'pduty', 'nduty', 'rdelay', 'fdelay', 'rphase', 'fphase', 'tvmax', 'tvmin', 'pslewrate', 'nslewrate', 'vupper', 'vmid', 'vlower', 'variance', 'pvrms'),
+        help='Value to measure')
     args = parser.parse_args()
 
     if args.version:
@@ -343,12 +353,18 @@ def main():
             histfile = os.path.join(os.path.expanduser("~"), ".ds1054z_history")
             try:
                 readline.read_history_file(histfile)
-            except FileNotFoundError:
-                pass
+            except IOError as e:
+                if e.errno != errno.ENOENT:
+                    raise e
             atexit.register(readline.write_history_file, histfile)
         except ImportError:
             pass
         run_shell(ds)
+
+    if args.action == 'measure':
+        v = ds.get_channel_measurement(args.channel, args.item, type=args.type)
+        if v is not None:
+            print(v)
 
 def run_shell(ds):
     """ ds : DS1054Z instance """
