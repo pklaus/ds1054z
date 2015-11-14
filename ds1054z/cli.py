@@ -18,6 +18,7 @@ import pkg_resources
 import sys
 import os
 import itertools
+import errno
 
 from ds1054z import DS1054Z
 
@@ -343,8 +344,9 @@ def main():
             histfile = os.path.join(os.path.expanduser("~"), ".ds1054z_history")
             try:
                 readline.read_history_file(histfile)
-            except FileNotFoundError:
-                pass
+            except IOError as e:
+                if e.errno != errno.ENOENT:
+                    raise e
             atexit.register(readline.write_history_file, histfile)
         except ImportError:
             pass
