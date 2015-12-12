@@ -17,7 +17,9 @@ try:
         LDESC = LDESC.replace(text, '')
     # Converting to rst
     LDESC = pypandoc.convert(LDESC, 'rst', format='md')
-except (ImportError, IOError, RuntimeError):
+except (ImportError, IOError, RuntimeError) as e:
+    print("Could not create long description:")
+    print(str(e))
     LDESC = ''
 
 setup(name='ds1054z',
