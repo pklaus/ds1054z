@@ -31,7 +31,7 @@ class DS1054Z(vxi11.Instrument):
     :ivar firmware: e.g. ``'00.04.03.SP1'``
     """
 
-    IDN_PATTERN = r'^RIGOL TECHNOLOGIES,DS1\d\d\dZ,'
+    IDN_PATTERN = r'^RIGOL TECHNOLOGIES,DS1\d\d\dZ( Plus)?,'
     ENCODING = 'utf-8'
     H_GRID = 12
     SAMPLES_ON_DISPLAY = 1200
@@ -50,7 +50,11 @@ class DS1054Z(vxi11.Instrument):
         idn = self.idn
         match = re.match(self.IDN_PATTERN, idn)
         if not match:
-            raise NameError('Unknown device identification: %s' % idn)
+            msg = "Unknown device identification:\n%s\n" \
+                  "If you believe this device should be supported " \
+                  "by this package, feel free to contact " \
+                  "the maintainer with this information." % idn
+            raise NameError(msg)
         idn = idn.split(',')
         self.vendor = idn[0]
         self.product = idn[1]
