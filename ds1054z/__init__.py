@@ -48,7 +48,9 @@ class DS1054Z(vxi11.Instrument):
         self.start = clock()
         super(DS1054Z, self).__init__(host, *args, **kwargs)
         idn = self.idn
-        assert re.match(self.IDN_PATTERN, idn)
+        match = re.match(self.IDN_PATTERN, idn)
+        if not match:
+            raise NameError('Unknown device identification: %s' % idn)
         idn = idn.split(',')
         self.vendor = idn[0]
         self.product = idn[1]
