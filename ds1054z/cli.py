@@ -368,6 +368,7 @@ def main():
 
 def run_shell(ds):
     """ ds : DS1054Z instance """
+    from vxi11.vxi11 import Vxi11Exception
     print(SHELL_HOWTO)
     print('> *IDN?')
     print(ds.query("*IDN?"))
@@ -378,11 +379,14 @@ def run_shell(ds):
             if cmd in ('quit', 'exit'):
                 break
             if '?' in cmd:
-                ret = ds.query_raw(cmd)
                 try:
-                    print(ret.decode('utf-8').strip())
-                except UnicodeDecodeError:
-                    print('binary message:', ret)
+                    ret = ds.query_raw(cmd)
+                    try:
+                        print(ret.decode('utf-8').strip())
+                    except UnicodeDecodeError:
+                        print('binary message:', ret)
+                except Vxi11Exception:
+                    print("No response from the scope. Bad cmd?")
             else:
                 ds.write(cmd)
     except KeyboardInterrupt as e:
