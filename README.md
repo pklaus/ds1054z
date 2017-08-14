@@ -1,4 +1,4 @@
-[![Github pklaus/ds1054z](https://img.shields.io/badge/Github-pklaus/ds1054z-brightgreen.svg)](https://github.com/pklaus/ds1054z) [![PyPI Package](https://img.shields.io/pypi/v/ds1054z.svg)](https://pypi.python.org/pypi/ds1054z) [![Code Issues](https://www.quantifiedcode.com/api/v1/project/6c0f609927d9456a87e5aa9016320733/badge.svg)](https://www.quantifiedcode.com/app/project/6c0f609927d9456a87e5aa9016320733)
+[![Github pklaus/ds1054z](https://img.shields.io/badge/Github-pklaus/ds1054z-brightgreen.svg)](https://github.com/pklaus/ds1054z) [![PyPI Package](https://img.shields.io/pypi/v/ds1054z.svg)](https://pypi.python.org/pypi/ds1054z)
 
 # ds1054z
 
