@@ -35,7 +35,7 @@ class DS1054Z(vxi11.Instrument):
     ENCODING = 'utf-8'
     H_GRID = 12
     SAMPLES_ON_DISPLAY = 1200
-    DISPLAY_DATA_BYTES = 1152068
+    DISPLAY_DATA_BYTES = 100000
     SCALE_MANTISSAE = (1, 2, 5)
     MIN_TIMEBASE_SCALE = 5E-9
     MAX_TIMEBASE_SCALE = 50E0
@@ -624,12 +624,10 @@ class DS1054Z(vxi11.Instrument):
         The bitmap bytes of the current screen content.
         This property will be updated every time you access it.
         """
-        self.write(":DISPlay:DATA?")
+        self.write(":DISPlay:DATA? ON,OFF,PNG")
         logger.info("Receiving screen capture...")
         buff = self.read_raw(self.DISPLAY_DATA_BYTES)
         logger.info("read {0} bytes in .display_data".format(len(buff)))
-        if len(buff) != self.DISPLAY_DATA_BYTES:
-            raise NameError("display_data: didn't receive the right number of bytes")
         return DS1054Z.decode_ieee_block(buff)
 
     @property
