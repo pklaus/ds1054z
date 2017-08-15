@@ -64,6 +64,9 @@ class DS1054Z(vxi11.Instrument):
         self.possible_probe_ratio_values = self._populate_possible_values('PROBE_RATIO')
         self.possible_timebase_scale_values = self._populate_possible_values('TIMEBASE_SCALE')
         self.possible_channel_scale_values = self._populate_possible_values('CHANNEL_SCALE')
+        self.possible_memory_depth_values = (12000, 120000, 1200000, 12000000, 24000000,
+                                              6000,  60000,  600000,  6000000, 12000000,
+                                              3000,  30000,  300000,  3000000,  6000000)
 
     def clock(self):
         return clock() - self.start
@@ -566,6 +569,53 @@ class DS1054Z(vxi11.Instrument):
             if curr_running:
                 self.run()
         return int(float(mdep))
+
+    @property
+    def memory_depth(self):
+        """
+        This maps to the aquisition memory depth the scope is currently set to.
+        In contrast to :py:attr:`memory_depth_curr_waveform`,
+        :py:attr:`memory_depth_internal_currently_shown` and
+        :py:attr:`memory_depth_internal_total`, this property
+        is simply a quite direct access to the `:ACQuire:MDEPth`
+        command of the oscilloscope.
+
+        You can change the memory_depth like this:
+
+        >>> scope.memory_depth = 12e6
+
+        This will set the memory depth to 12M data points.
+        Please note that changing the memory_depth is only possible when
+        the oscilloscope is :py:attr:`running`.
+        Otherwise, setting this property will raise an exception.
+        In addition, not all values are valid in all cases.
+        This depends on the number of channels currently in use (including the trigger!).
+        Please read the property back after setting it,
+        to check that your desired value was actually acknowledged by the oscilloscope.
+
+        When requesting this property, an integer value is returned
+        or the string 'AUTO'.
+
+        This value of this property will be updated every time you access it.
+        """
+        mdepth = self.query(':ACQuire:MDEPth?')
+        try:
+            return int(mdepth)
+        except:
+            return mdepth
+
+    @memory_depth.setter
+    def memory_depth(self, mdepth):
+        if not self.running:
+            raise NameError("Cannot set memory depth when not running.")
+        if type(mdepth) in (float, int):
+            # determin closest memory depth:
+            new_mdepth = min(self.possible_memory_depth_values, key=lambda x:abs(x-mdepth))
+        else:
+            new_mdepth = mdepth
+        assert new_mdepth == 'AUTO' or new_mdepth in self.possible_memory_depth_values
+        self.write(":ACQuire:MDEPth {0}".format(new_mdepth))
+        #assert self.query(":ACQuire:MDEPth?") == new_mdepth
 
     @property
     def display_data(self):
