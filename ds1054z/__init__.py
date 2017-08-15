@@ -43,6 +43,7 @@ class DS1054Z(vxi11.Instrument):
     MAX_CHANNEL_SCALE = 1E1
     MIN_PROBE_RATIO = 0.01
     MAX_PROBE_RATIO = 1000
+    CHANNEL_LIST = ("CHAN1", "CHAN2", "CHAN3", "CHAN4", "MATH")
 
     def __init__(self, host, *args, **kwargs):
         self.start = clock()
@@ -638,10 +639,25 @@ class DS1054Z(vxi11.Instrument):
         This property will be updated every time you access it.
         """
         channel_list = []
-        for channel in ["CHAN1", "CHAN2", "CHAN3", "CHAN4", "MATH"]:
-            if self.query(channel + ":DISPlay?") == '1':
+        for channel in self.CHANNEL_LIST:
+            if self.query(":{0}:DISPlay?".format(channel)) == '1':
                 channel_list.append(channel)
         return channel_list
+
+    def display_channel(self, channel, enable=True):
+        """
+        Display (enable) or hide (disable) a channel for aquisition and display
+        """
+        channel = self._interpret_channel(channel)
+        self.write(':{0}:DISPlay {1}'.format(channel, int(enable)))
+
+    def display_only_channel(self, channel):
+        """
+        Convenience function to display (enable) a single channel and hide (disable) all others.
+        """
+        channel = self._interpret_channel(channel)
+        for ch in self.CHANNEL_LIST:
+            self.write(':{0}:DISPlay {1}'.format(ch, int(ch == channel)))
 
     def get_probe_ratio(self, channel):
         """
