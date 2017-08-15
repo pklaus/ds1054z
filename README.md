@@ -23,6 +23,14 @@ of the DS1000Z and MSO1000Z series by Rigol:
 * MSO1074Z-S
 * MSO1104Z-S
 
+## Features
+
+* Discovering your scope via mDNS / DNS-SD
+* Saving Screenshots (incl. adjustable dimming of on-screen controls)
+* Running / stopping the scope
+* Acquiring waveforms
+* ... more to come!
+
 ## Installation
 
 The installation is dead simple:
@@ -36,13 +44,11 @@ which should automatically get installed along with itself.
 For more information on the installation, please consult the
 [installation section][] of the [package documentation][].
 
-## Features
+**Recommended Firmware**
 
-* Discovering your scope via mDNS / DNS-SD
-* Saving Screenshots (incl. adjustable dimming of on-screen controls)
-* Running / stopping the scope
-* Acquiring waveforms
-* ... more to come!
+Older versions of the oscilloscope's firmware have many issues.
+The VXI-11 connection could be unstable or commands might return unexpected data.
+Specifically, I'm recommending version 00.04.04.SP3 (alias 00.04.04.03.02) published on 2017-02-08.
 
 ## Usage
 
@@ -77,14 +83,12 @@ print("Connected to: ", scope.idn)
 print("Currently displayed channels: ", str(scope.displayed_channels))
 ```
 
-Author
-------
+## Author
 
 * Philipp Klaus  
   <philipp.l.klaus@web.de>
 
-Resources
----------
+## Resources
 
 * This Python package was inspired by [DS1054Z_screen_capture](https://github.com/RoGeorge/DS1054Z_screen_capture).
 * The device discovery built into this software is largely based on [this code](https://gist.github.com/MerseyViking/c67b7d6ebdda55929fbd) by [MerseyViking / GeoSpark](https://github.com/MerseyViking).
