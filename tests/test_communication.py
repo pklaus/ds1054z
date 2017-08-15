@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import unittest, re
+import unittest, re, time
 
 import ds1054z
 
@@ -69,6 +69,7 @@ class DS1054zTest(unittest.TestCase):
         for mdepth in (12e3, 120e3):
 
             self.scope.run()
+            time.sleep(0.1)
             self.scope.memory_depth = mdepth
             self.scope.single()
             self.scope.tforce()
