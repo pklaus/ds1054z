@@ -69,9 +69,9 @@ class DS1054Z(object):
         try:
             backend = import_backend(backend)
         except UsbtmcNoSuchBackend:
-            raise ('Unknown backend {}.'.format(args.backend))
+            raise NameError('Unknown backend {}.'.format(backend))
         except UsbtmcMissingDependency as md:
-            raise ('The backend could not be loaded, ' + str(md))
+            raise NameError('The backend could not be loaded, ' + str(md))
         self.dev = backend.Instrument(device)
 
         idn = self.idn
