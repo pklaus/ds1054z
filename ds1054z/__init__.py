@@ -67,12 +67,12 @@ class DS1054Z(object):
             else:
                 backend = 'python_vxi11'
         try:
-            backend = import_backend(backend)
+            backend_class = import_backend(backend)
         except UsbtmcNoSuchBackend:
             raise NameError('Unknown backend {}.'.format(backend))
         except UsbtmcMissingDependency as md:
             raise NameError('The backend could not be loaded, ' + str(md))
-        self.dev = backend.Instrument(device)
+        self.dev = backend_class.Instrument(device)
 
         idn = self.idn
         match = re.match(self.IDN_PATTERN, idn)
