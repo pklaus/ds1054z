@@ -73,6 +73,8 @@ class DS1054Z(object):
         except UsbtmcMissingDependency as md:
             raise NameError('The backend could not be loaded, ' + str(md))
         self.dev = backend_class.Instrument(device)
+        if backend == 'tcp_socket':
+            self.dev.LINE_ENDING = '\n'
 
         idn = self.idn
         match = re.match(self.IDN_PATTERN, idn)
